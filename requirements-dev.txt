@@ -1,0 +1,12 @@
+-r requirements.txt
+pytest>=7.0.0
+pytest-asyncio
+black
+isort
+mypy
+flake8
+
+# Optional Outlook dependencies
+O365
+exchangelib
+requests-oauthlib
