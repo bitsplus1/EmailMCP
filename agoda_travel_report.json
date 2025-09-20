@@ -1,0 +1,58 @@
+{
+  "report_date": "2025-09-21 04:47:15",
+  "total_expenses": 840.0,
+  "currency": "USD",
+  "total_bookings": 2,
+  "total_nights": 5,
+  "average_per_night": 168.0,
+  "destinations": [
+    "Singapore, Singapore",
+    "Hong Kong, Hong Kong"
+  ],
+  "by_destination": {
+    "Singapore, Singapore": {
+      "total_amount": 320.0,
+      "nights": 2,
+      "bookings": 1,
+      "hotels": [
+        "Marina Bay Sands"
+      ]
+    },
+    "Hong Kong, Hong Kong": {
+      "total_amount": 520.0,
+      "nights": 3,
+      "bookings": 1,
+      "hotels": [
+        "Conrad Hong Kong"
+      ]
+    }
+  },
+  "expenses": [
+    {
+      "booking_reference": "AGD456789123",
+      "hotel_name": "Marina Bay Sands",
+      "location": "Singapore, Singapore",
+      "check_in_date": "28 January 2024",
+      "check_out_date": "30 January 2024",
+      "nights": 2,
+      "total_amount": 320.0,
+      "currency": "USD",
+      "guest_name": "John Doe",
+      "email_date": "2024-01-25T11:45:00Z",
+      "email_id": "AAMkADExMzJmNzg4LWE4YjYtNGQ4Zi1iMzA5LTQ2ZjI3ZjE4ZjE4ZgBGAAAAAAC7xKjIC"
+    },
+    {
+      "booking_reference": "AGD321654987",
+      "hotel_name": "Conrad Hong Kong",
+      "location": "Hong Kong, Hong Kong",
+      "check_in_date": "12 February 2024",
+      "check_out_date": "15 February 2024",
+      "nights": 3,
+      "total_amount": 520.0,
+      "currency": "USD",
+      "guest_name": "John Doe",
+      "email_date": "2024-02-08T10:30:00Z",
+      "email_id": "AAMkADExMzJmNzg4LWE4YjYtNGQ4Zi1iMzA5LTQ2ZjI3ZjE4ZjE4ZgBGAAAAAAC7xKjIE"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "log_level": "DEBUG",
+  "log_dir": "logs",
+  "max_concurrent_requests": 5,
+  "request_timeout": 30,
+  "outlook_connection_timeout": 10,
+  "enable_performance_logging": true,
+  "enable_console_output": true,
+  "server_mode": "standalone",
+  "health_check_interval": 30,
+  "rate_limiting": {
+    "enabled": false,
+    "requests_per_minute": 60,
+    "burst_size": 10
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics_interval": 60,
+    "health_check_endpoint": true
+  },
+  "security": {
+    "validate_requests": true,
+    "sanitize_responses": false,
+    "max_request_size": 2097152
+  }
+}

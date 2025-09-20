@@ -1,0 +1,26 @@
+{
+  "log_level": "INFO",
+  "log_dir": "/var/log/outlook-mcp-server",
+  "max_concurrent_requests": 20,
+  "request_timeout": 45,
+  "outlook_connection_timeout": 15,
+  "enable_performance_logging": true,
+  "enable_console_output": false,
+  "server_mode": "stdio",
+  "health_check_interval": 60,
+  "rate_limiting": {
+    "enabled": true,
+    "requests_per_minute": 100,
+    "burst_size": 20
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics_interval": 300,
+    "health_check_endpoint": true
+  },
+  "security": {
+    "validate_requests": true,
+    "sanitize_responses": true,
+    "max_request_size": 1048576
+  }
+}
