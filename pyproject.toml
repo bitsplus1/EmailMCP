@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "email-mcp"
+version = "0.1.0"
+description = "A MCP server to read Outlook email using Python"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "asyncio-mqtt",
+    "pydantic>=2.0.0",
+    "python-dotenv",
+    "aiofiles",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio",
+    "black",
+    "isort",
+    "mypy",
+    "flake8",
+]
+outlook = [
+    "O365",
+    "exchangelib",
+    "requests-oauthlib",
+]
+
+[project.scripts]
+email-mcp = "email_mcp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["email_mcp*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
