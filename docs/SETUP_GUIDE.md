@@ -54,7 +54,7 @@ If this command succeeds without errors, Outlook COM access is working.
 
 ```bash
 # Clone from repository
-git clone https://github.com/your-org/outlook-mcp-server.git
+git clone https://github.com/bitsplus1/EmailMCP.git
 cd outlook-mcp-server
 
 # Or download and extract ZIP file

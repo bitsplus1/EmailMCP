@@ -179,13 +179,15 @@ class MCPProtocolHandler:
         logger.debug(f"Processing request: {request.method} (ID: {request.id})")
         
         try:
-            # Validate session is active
+            # Validate session is active (auto-initialize for HTTP mode)
             if not self.session_active:
-                return MCPResponse.create_error(
-                    request.id,
-                    self.ERROR_CODES["SERVER_ERROR"],
-                    "No active session. Handshake required."
-                )
+                # Auto-initialize session for HTTP requests
+                logger.info("Auto-initializing session for HTTP request")
+                self.client_info = {
+                    "name": "http-client",
+                    "version": "1.0.0"
+                }
+                self.session_active = True
             
             # Validate request format
             request.validate()

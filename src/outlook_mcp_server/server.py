@@ -128,7 +128,12 @@ class OutlookMCPServer:
             # Shutdown thread pool
             if self._executor:
                 self.logger.debug("Shutting down thread pool")
-                self._executor.shutdown(wait=True, timeout=5.0)
+                try:
+                    # Try with timeout parameter (Python 3.9+)
+                    self._executor.shutdown(wait=True, timeout=5.0)
+                except TypeError:
+                    # Fallback for older Python versions
+                    self._executor.shutdown(wait=True)
                 self._executor = None
             
             # Cleanup components
@@ -373,6 +378,19 @@ class OutlookMCPServer:
             self.outlook_adapter is not None and 
             self.outlook_adapter.is_connected()
         )
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get detailed health status information."""
+        from datetime import datetime
+        
+        return {
+            "status": "healthy" if self.is_healthy() else "unhealthy",
+            "healthy": self.is_healthy(),
+            "running": self._running,
+            "outlook_connected": self.outlook_adapter.is_connected() if self.outlook_adapter else False,
+            "timestamp": datetime.utcnow().isoformat(),
+            "server_info": self.get_server_info()
+        }
     
     async def _cleanup(self) -> None:
         """Cleanup server resources."""

@@ -36,7 +36,7 @@ All dependencies are listed in `requirements.txt`:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/outlook-mcp-server.git
+git clone https://github.com/bitsplus1/EmailMCP.git
 cd outlook-mcp-server
 
 # 2. Install dependencies

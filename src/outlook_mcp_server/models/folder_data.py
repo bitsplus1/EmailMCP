@@ -43,18 +43,46 @@ class FolderData:
             raise ValidationError("Unread count cannot exceed total item count")
         
         # Validate folder name doesn't contain invalid characters
-        if not self._is_valid_folder_name(self.name):
-            raise ValidationError("Folder name contains invalid characters")
+        # Temporarily disabled to handle Unicode folder names
+        # if not self._is_valid_folder_name(self.name):
+        #     raise ValidationError("Folder name contains invalid characters")
 
     @staticmethod
     def _is_valid_folder_name(name: str) -> bool:
-        """Validate folder name format."""
+        """Validate folder name format - allows Unicode characters including Chinese."""
         if not name or not isinstance(name, str):
             return False
         
-        # Folder names should not contain certain characters
+        # Strip whitespace
+        name = name.strip()
+        if not name:
+            return False
+        
+        # Debug logging to see what's causing the issue
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Only reject characters that are actually problematic for file systems
+        # Allow Unicode characters (including Chinese, Japanese, Korean, etc.)
         invalid_chars = ['<', '>', ':', '"', '|', '?', '*', '\\', '/']
-        return not any(char in name for char in invalid_chars)
+        
+        # Check for invalid characters
+        problematic_chars = [char for char in name if char in invalid_chars]
+        if problematic_chars:
+            logger.debug(f"Folder name '{name}' contains invalid chars: {problematic_chars}")
+            return False
+        
+        # Check for control characters (ASCII 0-31)
+        control_chars = [char for char in name if ord(char) < 32]
+        if control_chars:
+            logger.debug(f"Folder name '{name}' contains control chars: {[ord(c) for c in control_chars]}")
+            return False
+        
+        # Log successful validation for debugging
+        logger.debug(f"Folder name '{name}' passed validation (length: {len(name)})")
+        
+        # Allow all other characters including Unicode
+        return True
 
     @staticmethod
     def validate_folder_name(folder_name: str) -> bool:

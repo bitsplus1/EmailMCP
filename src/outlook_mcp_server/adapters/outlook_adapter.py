@@ -124,16 +124,53 @@ class OutlookAdapter:
         Returns:
             bool: True if connected, False otherwise
         """
+        logger.debug(f"Checking connection: _connected={self._connected}, _outlook_app={self._outlook_app is not None}, _namespace={self._namespace is not None}")
+        
         if not self._connected or not self._outlook_app or not self._namespace:
+            logger.debug("Basic connection check failed")
             return False
             
         try:
+            # Initialize COM for this thread if needed
+            pythoncom.CoInitialize()
+            
             # Test connection by accessing a basic property
-            self._namespace.GetDefaultFolder(6)  # Try to access inbox
-            return True
-        except:
-            self._connected = False
-            return False
+            # Try multiple approaches to verify connection
+            
+            # First, try to access the namespace
+            if self._namespace is None:
+                logger.debug("Namespace is None")
+                return False
+            
+            # Try to get the default folder (inbox)
+            logger.debug("Attempting to access inbox folder")
+            inbox = self._namespace.GetDefaultFolder(6)  # olFolderInbox = 6
+            
+            # If we can access the inbox, connection is good
+            if inbox is not None:
+                logger.debug("Successfully accessed inbox folder")
+                return True
+            else:
+                logger.debug("Inbox folder is None")
+                self._connected = False
+                return False
+                
+        except Exception as e:
+            # Check if this is a COM threading error
+            if "marshaled for a different thread" in str(e) or "-2147417842" in str(e):
+                logger.debug("COM threading issue detected - connection exists but not accessible from this thread")
+                # Don't mark as disconnected for threading issues, just return the basic connection status
+                return self._connected
+            else:
+                # Log the specific error for debugging
+                logger.debug(f"Connection test failed with exception: {str(e)}")
+                self._connected = False
+                return False
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
     
     def get_namespace(self) -> Any:
         """
@@ -253,19 +290,58 @@ class OutlookAdapter:
             raise OutlookConnectionError("Not connected to Outlook")
         
         try:
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            
             logger.debug("Retrieving all Outlook folders")
+            
+            # For HTTP requests, we need to create a new Outlook connection in this thread
+            # because COM objects cannot be shared across threads
+            try:
+                outlook_app = win32com.client.Dispatch("Outlook.Application")
+                namespace = outlook_app.GetNamespace("MAPI")
+                
+                # Test the connection
+                namespace.GetDefaultFolder(6)  # Try to access inbox
+                
+                logger.debug("Created thread-local Outlook connection")
+                
+            except Exception as e:
+                logger.error(f"Failed to create thread-local Outlook connection: {e}")
+                # Fall back to original namespace (might work in some cases)
+                namespace = self._namespace
             
             folders = []
             
-            # Get all root folders from the namespace
-            root_folders = self._namespace.Folders
+            # Get only the main default folders (faster approach)
+            logger.debug("Getting main Outlook folders only (non-recursive)")
             
-            for root_folder in root_folders:
+            # Define the main folders we want to retrieve
+            main_folders = [
+                (6, "Inbox"),           # olFolderInbox
+                (5, "Sent Items"),      # olFolderSentMail  
+                (16, "Drafts"),         # olFolderDrafts
+                (3, "Deleted Items"),   # olFolderDeletedItems
+                (4, "Outbox"),          # olFolderOutbox
+                (9, "Calendar"),        # olFolderCalendar
+                (10, "Contacts"),       # olFolderContacts
+                (13, "Journal"),        # olFolderJournal
+                (12, "Tasks")           # olFolderTasks
+            ]
+            
+            for folder_id, folder_name in main_folders:
                 try:
-                    # Process each root folder and its subfolders
-                    self._collect_folders_recursive(root_folder, folders, "")
+                    logger.debug(f"Retrieving folder: {folder_name} (ID: {folder_id})")
+                    folder = namespace.GetDefaultFolder(folder_id)
+                    
+                    if folder:
+                        folder_data = self._transform_folder_to_data_simple(folder, "")
+                        if folder_data:
+                            folders.append(folder_data)
+                            logger.debug(f"Successfully added folder: {folder_data.name}")
+                        
                 except Exception as e:
-                    logger.warning(f"Error accessing root folder: {str(e)}")
+                    logger.warning(f"Could not access {folder_name}: {str(e)}")
                     continue
             
             logger.debug(f"Retrieved {len(folders)} folders")
@@ -276,7 +352,64 @@ class OutlookAdapter:
             if "access" in str(e).lower() or "permission" in str(e).lower():
                 raise PermissionError("", f"Access denied to folders: {str(e)}")
             raise OutlookConnectionError(f"Failed to retrieve folders: {str(e)}")
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
     
+    def _transform_folder_to_data_simple(self, folder: Any, parent_path: str) -> Optional[FolderData]:
+        """
+        Transform a single Outlook folder to FolderData without recursion.
+        
+        Args:
+            folder: The COM folder object
+            parent_path: Parent folder path
+            
+        Returns:
+            FolderData object or None if transformation fails
+        """
+        try:
+            # Get basic folder properties
+            folder_name = getattr(folder, 'Name', 'Unknown')
+            folder_id = getattr(folder, 'EntryID', '')
+            
+            # Sanitize folder name for problematic characters
+            if not folder_name or folder_name == 'Unknown':
+                return None
+                
+            # Clean the folder name of any problematic characters
+            clean_name = ''.join(c for c in folder_name if ord(c) >= 32)  # Remove control chars
+            if not clean_name:
+                clean_name = "Unknown_Folder"
+            
+            # Get item counts safely
+            try:
+                item_count = getattr(folder, 'Items', None)
+                item_count = len(item_count) if item_count else 0
+            except:
+                item_count = 0
+                
+            try:
+                unread_count = getattr(folder, 'UnReadItemCount', 0)
+            except:
+                unread_count = 0
+            
+            # Create folder data with safe values
+            return FolderData(
+                id=folder_id or f"folder_{clean_name}_{id(folder)}",
+                name=clean_name,
+                full_path=clean_name if not parent_path else f"{parent_path}/{clean_name}",
+                item_count=max(0, item_count),
+                unread_count=max(0, min(unread_count, item_count)),
+                parent_folder=parent_path,
+                folder_type="Mail"
+            )
+            
+        except Exception as e:
+            logger.warning(f"Could not transform folder: {str(e)}")
+            return None
+
     def _collect_folders_recursive(self, folder: Any, folder_list: List[FolderData], parent_path: str) -> None:
         """
         Recursively collect folders and convert them to FolderData objects.
