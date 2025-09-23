@@ -45,11 +45,13 @@ pip install -r requirements.txt
 # 3. Test the installation
 python main.py test
 
-# 4. Create configuration (optional)
-python main.py create-config
+# 4. Start the HTTP server (recommended for testing)
+python main.py http --config docker_config.json
 
-# 5. Start the server
-python main.py stdio
+# 5. Test with HTTP requests (see examples below)
+curl -X POST http://192.168.1.100:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":"1","method":"list_inbox_emails","params":{"limit":5}}'
 ```
 
 ### Production Deployment
@@ -91,10 +93,28 @@ For detailed installation instructions including system setup, security configur
 
 ## 🎯 Usage
 
-### Basic Usage
+### HTTP Server Mode (Recommended for Testing)
+
+The server supports HTTP mode for easy testing and integration:
 
 ```bash
-# Run as MCP server (default mode)
+# Run HTTP server with default configuration
+python main.py http
+
+# Run HTTP server with custom configuration
+python main.py http --config docker_config.json
+
+# HTTP server with custom host and port
+python main.py http --host 0.0.0.0 --port 8080
+
+# Test Outlook connection
+python main.py test
+```
+
+### MCP Protocol Mode (For MCP Clients)
+
+```bash
+# Run as MCP server (stdio mode)
 python main.py stdio
 
 # Run with custom configuration
@@ -102,25 +122,19 @@ python main.py stdio --config my_config.json
 
 # Interactive mode for development
 python main.py interactive --log-level DEBUG
-
-# Test Outlook connection
-python main.py test
 ```
 
 ### Production Usage
 
 ```bash
-# Production startup with health checks
-python start_server.py --config config/production.json
+# HTTP server for production (recommended)
+python main.py http --config docker_config.json --host 0.0.0.0 --port 8080
+
+# MCP stdio mode for MCP client integration
+python main.py stdio --config production_config.json
 
 # Service mode (no console output)
 python start_server.py --service-mode --pid-file /var/run/outlook-mcp.pid
-
-# Test connection before starting
-python start_server.py --test-connection
-
-# Validate configuration
-python start_server.py --validate-config
 ```
 
 ### Windows Service Management
@@ -210,47 +224,71 @@ Example configuration (`outlook_mcp_server_config.json`):
 | `send_email` | Send email through Outlook | `to_recipients`, `subject`, `body`, etc. |
 | `get_folders` | List all available folders | None |
 
-#### Example Requests
+#### HTTP API Examples
+
+**Start the HTTP server:**
+```bash
+python main.py http --config docker_config.json
+```
 
 **Simple Inbox Listing:**
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "1",
-  "method": "list_inbox_emails",
-  "params": {
-    "unread_only": true,
-    "limit": 10
-  }
-}
+```bash
+curl -X POST http://192.168.1.100:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "1",
+    "method": "list_inbox_emails",
+    "params": {
+      "unread_only": true,
+      "limit": 10
+    }
+  }'
 ```
 
-**Folder-Specific Listing:**
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "2",
-  "method": "list_emails",
-  "params": {
-    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
-    "unread_only": true,
-    "limit": 10
-  }
-}
+**Get Specific Email:**
+```bash
+curl -X POST http://192.168.1.100:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "2",
+    "method": "get_email",
+    "params": {
+      "email_id": "YOUR_EMAIL_ID_HERE"
+    }
+  }'
 ```
 
-**Search in Specific Folder:**
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "3",
-  "method": "search_emails",
-  "params": {
-    "query": "subject:meeting",
-    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
-    "limit": 10
-  }
-}
+**Search Emails:**
+```bash
+curl -X POST http://192.168.1.100:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "3",
+    "method": "search_emails",
+    "params": {
+      "query": "meeting",
+      "limit": 10
+    }
+  }'
+```
+
+**Send Email:**
+```bash
+curl -X POST http://192.168.1.100:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "4",
+    "method": "send_email",
+    "params": {
+      "to": ["recipient@example.com"],
+      "subject": "Test Email",
+      "body": "This is a test email sent via the MCP server."
+    }
+  }'
 ```
 
 #### Example Response

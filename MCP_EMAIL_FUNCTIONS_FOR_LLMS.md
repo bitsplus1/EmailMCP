@@ -6,6 +6,18 @@ This document provides comprehensive function descriptions for LLMs (like Gemini
 
 The Outlook MCP Server provides four core email functions that enable LLMs to interact with Microsoft Outlook for email management tasks. These functions are designed to handle common email workflows including reading, searching, retrieving, and sending emails.
 
+## Server Setup
+
+The recommended way to run the server for testing and integration is using HTTP mode:
+
+```bash
+# Start the HTTP server
+python main.py http --config docker_config.json
+
+# Server will be available at http://localhost:8080
+# All requests are sent to the /mcp endpoint using POST method
+```
+
 ## Function Descriptions
 
 ### 1. `list_inbox_emails`
@@ -51,6 +63,21 @@ The Outlook MCP Server provides four core email functions that enable LLMs to in
 - "Check for unread emails" → `{"unread_only": true, "limit": 50}`
 - "Summarize today's emails" → `{"unread_only": false, "limit": 20}`
 
+**HTTP Request Example**:
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "1",
+    "method": "list_inbox_emails",
+    "params": {
+      "unread_only": false,
+      "limit": 10
+    }
+  }'
+```
+
 ### 2. `get_email`
 
 **Purpose**: Retrieve complete details for a specific email using its unique ID.
@@ -79,6 +106,20 @@ The Outlook MCP Server provides four core email functions that enable LLMs to in
 - After finding emails with `search_emails`, use `get_email` to read full content
 - User says "read me the full email from John about the project"
 - Need complete email details for response generation
+
+**HTTP Request Example**:
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "2",
+    "method": "get_email",
+    "params": {
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DE00000"
+    }
+  }'
+```
 
 ### 3. `send_email`
 
@@ -116,6 +157,22 @@ The Outlook MCP Server provides four core email functions that enable LLMs to in
 - "Reply to Sarah's email about the meeting"
 - "Send a follow-up email to the team"
 
+**HTTP Request Example**:
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "3",
+    "method": "send_email",
+    "params": {
+      "to": ["john@company.com"],
+      "subject": "Project Update",
+      "body": "Hi John, here is the latest update on our project..."
+    }
+  }'
+```
+
 ### 4. `search_emails`
 
 **Purpose**: Search for emails across all folders using keywords, sender information, or other criteria.
@@ -148,6 +205,21 @@ The Outlook MCP Server provides four core email functions that enable LLMs to in
 - "Find emails about the quarterly report" → `{"query": "quarterly report"}`
 - "Show me emails from John in the last week" → `{"query": "John Smith"}`
 - "Search for unread emails about meetings" → `{"query": "meeting", "unread_only": true}`
+
+**HTTP Request Example**:
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "4",
+    "method": "search_emails",
+    "params": {
+      "query": "quarterly report",
+      "limit": 20
+    }
+  }'
+```
 
 ## Common Workflow Patterns
 
@@ -252,5 +324,71 @@ Functions may return errors for:
 5. **Use descriptive search queries** - include relevant keywords that would appear in emails
 6. **Consider folder names in different languages** - Outlook may use localized folder names
 7. **Chain functions logically** - use search/list functions first, then get_email for details, then send_email for responses
+
+## HTTP Server Usage
+
+The recommended way to use this MCP server is through HTTP mode, which provides a simple REST-like interface:
+
+### Starting the Server
+```bash
+python main.py http --config docker_config.json
+```
+
+### Making Requests
+All requests are sent to `http://localhost:8080/mcp` using POST method with JSON-RPC 2.0 format:
+
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "unique_request_id",
+    "method": "function_name",
+    "params": {
+      "parameter1": "value1",
+      "parameter2": "value2"
+    }
+  }'
+```
+
+### Integration with Programming Languages
+
+**Python Example:**
+```python
+import requests
+
+def call_mcp_function(method, params):
+    response = requests.post('http://localhost:8080/mcp', json={
+        "jsonrpc": "2.0",
+        "id": method,
+        "method": method,
+        "params": params
+    })
+    return response.json()['result']
+
+# Usage
+emails = call_mcp_function('list_inbox_emails', {'limit': 10})
+```
+
+**JavaScript Example:**
+```javascript
+async function callMCPFunction(method, params) {
+    const response = await fetch('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: method,
+            method: method,
+            params: params
+        })
+    });
+    const result = await response.json();
+    return result.result;
+}
+
+// Usage
+const emails = await callMCPFunction('list_inbox_emails', {limit: 10});
+```
 
 This MCP server enables comprehensive email management through Microsoft Outlook, allowing LLMs to help users with email-related tasks efficiently and effectively.

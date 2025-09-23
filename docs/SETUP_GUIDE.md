@@ -223,7 +223,27 @@ Environment variables take precedence over configuration file settings.
 
 ## Running the Server
 
-### Standard MCP Mode (Recommended)
+### HTTP Server Mode (Recommended for Testing)
+
+The HTTP server mode is ideal for testing and integration with web applications:
+
+```bash
+# Run HTTP server with default configuration
+python main.py http
+
+# Run HTTP server with custom configuration (recommended)
+python main.py http --config docker_config.json
+
+# Run HTTP server with custom host and port
+python main.py http --host 0.0.0.0 --port 8080 --config docker_config.json
+
+# Test the HTTP server
+curl -X POST http://192.168.1.100:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":"1","method":"list_inbox_emails","params":{"limit":5}}'
+```
+
+### Standard MCP Mode (For MCP Clients)
 
 For integration with MCP clients:
 
@@ -283,12 +303,18 @@ nssm start OutlookMCPServer
 python main.py [mode] [options]
 
 Modes:
-  stdio         Run as MCP stdio server (default)
+  http          Run as HTTP server (recommended for testing)
+  stdio         Run as MCP stdio server (for MCP clients)
   interactive   Run in interactive mode with console output
   test          Test Outlook connection and exit
   create-config Create sample configuration file
 
-Options:
+HTTP Mode Options:
+  --host HOST         Host to bind to (default: localhost)
+  --port PORT         Port to bind to (default: 8080)
+  --config PATH       Path to configuration file (JSON format)
+
+General Options:
   --config PATH       Path to configuration file (JSON format)
   --log-level LEVEL   Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   --log-dir PATH      Directory for log files
