@@ -302,3 +302,53 @@ class FolderService:
         except Exception as e:
             logger.error(f"Error generating folder statistics: {str(e)}")
             raise OutlookConnectionError(f"Failed to generate folder statistics: {str(e)}")
+    
+    def debug_folder_names(self) -> Dict[str, Any]:
+        """
+        Debug method to get actual folder names for troubleshooting localization issues.
+        
+        Returns:
+            Dict[str, Any]: Debug information about default folder names
+            
+        Raises:
+            OutlookConnectionError: If not connected to Outlook
+        """
+        try:
+            logger.debug("Getting debug information for folder names")
+            
+            # Ensure we're connected
+            if not self.outlook_adapter.is_connected():
+                raise OutlookConnectionError("Not connected to Outlook")
+            
+            # Get default folder names from adapter
+            default_folder_names = self.outlook_adapter.get_default_folder_names()
+            
+            # Get all available folders
+            try:
+                all_folders = self.get_folders()
+                folder_list = [{"name": f.get("name"), "full_path": f.get("full_path"), "type": f.get("folder_type")} for f in all_folders]
+            except Exception as e:
+                logger.warning(f"Could not get all folders: {e}")
+                folder_list = []
+            
+            debug_info = {
+                "default_folders": default_folder_names,
+                "all_folders": folder_list,
+                "folder_count": len(folder_list),
+                "common_inbox_names": [
+                    "Inbox", "收件匣", "收件夾", "收件箱", "受信トレイ"
+                ],
+                "instructions": {
+                    "message": "Use the 'actual_name' from default_folders for your search queries",
+                    "example": "If you see 'actual_name': '收件匣' for folder ID 6, use '收件匣' in your search_emails request"
+                }
+            }
+            
+            logger.debug(f"Generated debug info for {len(folder_list)} folders")
+            return debug_info
+            
+        except OutlookConnectionError:
+            raise
+        except Exception as e:
+            logger.error(f"Error generating folder debug info: {str(e)}")
+            raise OutlookConnectionError(f"Failed to generate folder debug info: {str(e)}")

@@ -85,6 +85,8 @@ Before beginning the integration setup, ensure you have the following prerequisi
 
 ### Outlook Configuration Verification
 
+⚠️ **IMPORTANT**: **Always launch Outlook BEFORE starting the MCP server!**
+
 Before proceeding, verify your Outlook setup:
 
 ```powershell
@@ -421,16 +423,18 @@ cd C:\path\to\outlook-mcp-server && echo {"jsonrpc": "2.0", "id": "search", "met
 
 ### Step B1: Start MCP Server in HTTP Mode
 
-1. **Open a command prompt** and navigate to your MCP server directory:
-```bash
-cd "C:\Users\USER\Documents\Github Repo\EmailMCP"
-```
+⚠️ **CRITICAL REQUIREMENT**: **Outlook MUST be running before starting the MCP server!**
 
-2. **Make sure Outlook is running** (very important!):
+1. **Launch Outlook first** (REQUIRED!):
 ```bash
 start outlook
 ```
-Wait for Outlook to fully load before proceeding.
+**Wait for Outlook to fully load and log into your email account before proceeding.**
+
+2. **Open a command prompt** and navigate to your MCP server directory:
+```bash
+cd "C:\Users\USER\Documents\Github Repo\EmailMCP"
+```
 
 3. **Start the HTTP server**:
 
@@ -465,9 +469,23 @@ Available endpoints:
    Invoke-RestMethod -Uri "http://127.0.0.1:8080/health" -Method GET
    ```
 
+   **⚠️ IMPORTANT FOR DOCKER N8N USERS**: If you're running n8n in Docker Desktop, you **MUST** use your Windows machine's IP address that starts with **192.168.x.x** (not 127.0.0.1 or localhost).
+
+   **Find your Windows IP address**:
+   ```bash
+   # Method 1: Using ipconfig
+   ipconfig | findstr "IPv4"
+   
+   # Method 2: Using PowerShell
+   (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi" -PrefixLength 24).IPAddress
+   
+   # Method 3: Using wmic
+   wmic computersystem get name && ipconfig | findstr /i "ipv4"
+   ```
+
    **Test with your Windows IP** (for Docker access):
    ```bash
-   # Replace 192.168.1.164 with your actual Windows IP
+   # Replace 192.168.1.164 with your actual Windows IP (starts with 192.168.x.x)
    curl -s http://192.168.1.164:8080/health
    ```
 
@@ -500,10 +518,11 @@ Available endpoints:
    **Basic Configuration:**
    - **Method**: Select `POST` from dropdown
    - **URL**: Choose the URL that worked in your connectivity test:
-     - **Option 1**: `http://host.docker.internal:8080/mcp` (if host.docker.internal worked)
-     - **Option 2**: `http://192.168.1.164:8080/mcp` (replace with your Windows IP)
-     - **Option 3**: `http://127.0.0.1:8080/mcp` (if localhost worked)
+     - **Docker n8n (REQUIRED)**: `http://192.168.x.x:8080/mcp` (replace with your Windows IP that starts with 192.168)
+     - **Alternative for Docker**: `http://host.docker.internal:8080/mcp` (if host.docker.internal worked)
      - **Native n8n**: `http://127.0.0.1:8080/mcp`
+     
+   **⚠️ Docker Users**: You **MUST** use your Windows machine's IP address (192.168.x.x format) because Docker containers cannot access localhost/127.0.0.1 on the Windows host.
 
    **Headers Section:**
    - Click **"Add Header"**
@@ -605,8 +624,63 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
 
 ---
 
-### 📧 Function 2: list_emails
-**Purpose**: Get a list of emails from a specific folder
+### 📧 Function 2: list_inbox_emails
+**Purpose**: Get a list of emails from the default inbox folder (simple method)
+
+**HTTP Request Configuration:**
+- **Method**: `POST`
+- **URL**: `http://127.0.0.1:8080/mcp` (or your configured URL)
+- **Headers**: `Content-Type: application/json`
+- **Body (JSON)**:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "list-inbox-emails-request",
+  "method": "list_inbox_emails",
+  "params": {
+    "limit": 10,
+    "unread_only": false
+  }
+}
+```
+
+**Parameter Options:**
+- **limit** (optional): Number of emails to return (default: 50, max: 1000)
+- **unread_only** (optional): Filter to show only unread emails (default: false)
+
+**Expected Response:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "list-inbox-emails-request",
+  "result": {
+    "emails": [
+      {
+        "id": "000000001A447390AA...",
+        "subject": "Meeting Tomorrow",
+        "sender": "john.doe@company.com",
+        "sender_name": "John Doe",
+        "recipients": ["me@company.com"],
+        "received_time": "2025-09-22T10:30:00Z",
+        "sent_time": "2025-09-22T10:25:00Z",
+        "importance": "Normal",
+        "has_attachments": false,
+        "is_read": false,
+        "folder": "Inbox",
+        "size": 2048,
+        "body_preview": "Hi, just wanted to confirm our meeting..."
+      }
+    ],
+    "total_count": 150,
+    "folder": "Inbox"
+  }
+}
+```
+
+---
+
+### 📧 Function 3: list_emails
+**Purpose**: Get a list of emails from a specific folder by folder ID
 
 **HTTP Request Configuration:**
 - **Method**: `POST`
@@ -619,23 +693,17 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
   "id": "list-emails-request",
   "method": "list_emails",
   "params": {
-    "folder": "Inbox",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "limit": 10,
-    "offset": 0,
-    "include_body": false,
-    "sort_by": "received_time",
-    "sort_order": "desc"
+    "unread_only": false
   }
 }
 ```
 
 **Parameter Options:**
-- **folder** (required): Folder name (e.g., "Inbox", "Sent Items", "Drafts")
-- **limit** (optional): Number of emails to return (default: 50, max: 100)
-- **offset** (optional): Skip this many emails (for pagination, default: 0)
-- **include_body** (optional): Include email body content (default: false)
-- **sort_by** (optional): "received_time", "sent_time", "subject", "sender" (default: "received_time")
-- **sort_order** (optional): "asc" or "desc" (default: "desc")
+- **folder_id** (required): Folder ID to list emails from (use get_folders to see available folder IDs)
+- **limit** (optional): Number of emails to return (default: 50, max: 1000)
+- **unread_only** (optional): Filter to show only unread emails (default: false)
 
 **Expected Response:**
 ```json
@@ -670,7 +738,7 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
 
 ---
 
-### 📄 Function 3: get_email
+### 📄 Function 4: get_email
 **Purpose**: Get detailed information about a specific email
 
 **HTTP Request Configuration:**
@@ -741,7 +809,7 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
 
 ---
 
-### 🔍 Function 4: search_emails
+### 🔍 Function 5: search_emails
 **Purpose**: Search for emails using various criteria
 
 **HTTP Request Configuration:**
@@ -756,22 +824,16 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
   "method": "search_emails",
   "params": {
     "query": "subject:meeting AND from:john.doe@company.com",
-    "folder": "Inbox",
-    "limit": 20,
-    "include_body": false,
-    "date_from": "2025-09-01",
-    "date_to": "2025-09-30"
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
+    "limit": 20
   }
 }
 ```
 
 **Parameter Options:**
 - **query** (required): Search query using Outlook search syntax
-- **folder** (optional): Limit search to specific folder (default: all folders)
+- **folder_id** (optional): Folder ID to limit search to specific folder (use get_folders to see available folder IDs)
 - **limit** (optional): Number of results to return (default: 50, max: 100)
-- **include_body** (optional): Include email body in results (default: false)
-- **date_from** (optional): Start date in YYYY-MM-DD format
-- **date_to** (optional): End date in YYYY-MM-DD format
 
 **Search Query Examples:**
 - `"subject:meeting"` - Emails with "meeting" in subject
@@ -805,7 +867,97 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
     ],
     "total_count": 5,
     "query": "subject:meeting AND from:john.doe@company.com",
-    "search_folder": "Inbox"
+    "search_folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000"
+  }
+}
+```
+
+---
+
+### 📧 Function 6: send_email
+**Purpose**: Send an email through Outlook
+
+**HTTP Request Configuration:**
+- **Method**: `POST`
+- **URL**: `http://127.0.0.1:8080/mcp` (or your configured URL)
+- **Headers**: `Content-Type: application/json`
+- **Body (JSON)**:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "send-email-request",
+  "method": "send_email",
+  "params": {
+    "to_recipients": ["recipient@company.com", "another@example.com"],
+    "subject": "Automated Report - Daily Summary",
+    "body": "<html><body><h2>Daily Report</h2><p>Please find the daily summary attached.</p><p>Best regards,<br>Automation System</p></body></html>",
+    "cc_recipients": ["manager@company.com"],
+    "bcc_recipients": ["archive@company.com"],
+    "body_format": "html",
+    "importance": "normal",
+    "attachments": ["C:\\reports\\daily_summary.pdf"],
+    "save_to_sent_items": true
+  }
+}
+```
+
+**Parameter Options:**
+- **to_recipients** (required): List of recipient email addresses
+- **subject** (required): Email subject line
+- **body** (required): Email body content
+- **cc_recipients** (optional): List of CC recipients (default: none)
+- **bcc_recipients** (optional): List of BCC recipients (default: none)
+- **body_format** (optional): "html", "text", or "rtf" (default: "html")
+- **importance** (optional): "low", "normal", or "high" (default: "normal")
+- **attachments** (optional): List of file paths to attach (default: none)
+- **save_to_sent_items** (optional): Save to Sent Items folder (default: true)
+
+**Body Format Examples:**
+- **HTML**: `"<html><body><h1>Title</h1><p>Content with <b>formatting</b></p></body></html>"`
+- **Text**: `"Plain text email content\n\nWith line breaks"`
+- **RTF**: Rich Text Format for advanced formatting
+
+**Use Cases:**
+- **Automated Reports**: Send daily/weekly reports with attachments
+- **Notifications**: Alert users about system events or status changes
+- **Follow-ups**: Send automated follow-up emails based on triggers
+- **Data Export**: Email processed data or analysis results
+- **Alerts**: Send high-priority notifications to multiple recipients
+
+**Expected Response:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "send-email-request",
+  "result": {
+    "email_id": "000000001A447390AA447390AA447390AA447390AA447390AA447390AA447390AA447390",
+    "status": "sent",
+    "recipients": {
+      "to": ["recipient@company.com", "another@example.com"],
+      "cc": ["manager@company.com"],
+      "bcc": ["archive@company.com"]
+    },
+    "subject": "Automated Report - Daily Summary",
+    "body_format": "html",
+    "importance": "normal",
+    "attachments_count": 1,
+    "sent_time": "2025-09-22T14:30:00Z"
+  }
+}
+```
+
+**Error Responses:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "send-email-request",
+  "error": {
+    "code": -32602,
+    "message": "Invalid email address: invalid_email",
+    "data": {
+      "parameter": "to_recipients",
+      "validation_error": "Email format validation failed"
+    }
   }
 }
 ```
@@ -819,19 +971,44 @@ The Outlook MCP Server provides four main functions. Here are complete n8n HTTP 
 {"jsonrpc": "2.0", "id": "folders", "method": "get_folders", "params": {}}
 ```
 
-**Template 2: Get Latest 5 Emails from Inbox**
+**Template 2: Get Latest 5 Emails from Inbox (Simple)**
 ```json
-{"jsonrpc": "2.0", "id": "inbox", "method": "list_emails", "params": {"folder": "Inbox", "limit": 5}}
+{"jsonrpc": "2.0", "id": "inbox", "method": "list_inbox_emails", "params": {"limit": 5}}
 ```
 
-**Template 3: Search Today's Emails**
+**Template 3: Get Latest 5 Emails from Specific Folder**
+```json
+{"jsonrpc": "2.0", "id": "folder", "method": "list_emails", "params": {"folder_id": "YOUR_FOLDER_ID", "limit": 5}}
+```
+
+**Template 4: Search Today's Emails**
 ```json
 {"jsonrpc": "2.0", "id": "today", "method": "search_emails", "params": {"query": "received:today", "limit": 10}}
 ```
 
-**Template 4: Get Email with Full Content**
+**Template 5: Search in Specific Folder**
+```json
+{"jsonrpc": "2.0", "id": "search-folder", "method": "search_emails", "params": {"query": "subject:meeting", "folder_id": "YOUR_FOLDER_ID", "limit": 10}}
+```
+
+**Template 6: Get Email with Full Content**
 ```json
 {"jsonrpc": "2.0", "id": "detail", "method": "get_email", "params": {"email_id": "YOUR_EMAIL_ID", "include_body": true}}
+```
+
+**Template 7: Send Simple Email**
+```json
+{"jsonrpc": "2.0", "id": "send", "method": "send_email", "params": {"to_recipients": ["user@example.com"], "subject": "Test Email", "body": "Hello from n8n automation!"}}
+```
+
+**Template 8: Send HTML Email with Attachments**
+```json
+{"jsonrpc": "2.0", "id": "send-rich", "method": "send_email", "params": {"to_recipients": ["user@example.com"], "subject": "Report", "body": "<h1>Report</h1><p>Please see attached.</p>", "body_format": "html", "attachments": ["C:\\reports\\data.xlsx"]}}
+```
+
+**Template 9: n8n Production Example (Tested & Working)**
+```json
+{"jsonrpc": "2.0", "id": "send-email-request", "method": "send_email", "params": {"to_recipients": ["recipient@company.com"], "subject": "Automated Report - Daily Summary", "body": "<html><body><h2>Daily Report</h2><p>Please find the daily summary attached.</p><p>Best regards,<br>Automation System</p></body></html>", "cc_recipients": [], "bcc_recipients": [], "body_format": "html", "importance": "normal", "attachments": [], "save_to_sent_items": false}}
 ```
 
 ---

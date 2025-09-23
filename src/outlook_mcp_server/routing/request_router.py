@@ -21,8 +21,12 @@ class RequestRouter:
     def _setup_parameter_schemas(self) -> None:
         """Set up parameter validation schemas for each method."""
         self._parameter_schemas = {
+            "list_inbox_emails": {
+                "unread_only": {"type": bool, "required": False, "default": False},
+                "limit": {"type": int, "required": False, "default": 50, "min": 1, "max": 1000}
+            },
             "list_emails": {
-                "folder": {"type": str, "required": False, "default": None},
+                "folder_id": {"type": str, "required": True},
                 "unread_only": {"type": bool, "required": False, "default": False},
                 "limit": {"type": int, "required": False, "default": 50, "min": 1, "max": 1000}
             },
@@ -31,11 +35,25 @@ class RequestRouter:
             },
             "search_emails": {
                 "query": {"type": str, "required": True, "min_length": 1, "max_length": 1000},
-                "folder": {"type": str, "required": False, "default": None},
+                "folder_id": {"type": str, "required": False, "default": None},
                 "limit": {"type": int, "required": False, "default": 50, "min": 1, "max": 1000}
             },
             "get_folders": {
                 # No parameters required for get_folders
+            },
+            "send_email": {
+                "to_recipients": {"type": list, "required": True, "min_length": 1},
+                "subject": {"type": str, "required": True, "min_length": 1, "max_length": 255},
+                "body": {"type": str, "required": True, "min_length": 1},
+                "cc_recipients": {"type": list, "required": False, "default": None},
+                "bcc_recipients": {"type": list, "required": False, "default": None},
+                "body_format": {"type": str, "required": False, "default": "html"},
+                "importance": {"type": str, "required": False, "default": "normal"},
+                "attachments": {"type": list, "required": False, "default": None},
+                "save_to_sent_items": {"type": bool, "required": False, "default": True}
+            },
+            "debug_folder_names": {
+                # No parameters required for debug_folder_names
             }
         }
     
@@ -162,6 +180,10 @@ class RequestRouter:
             elif expected_type == int and param_value is not None:
                 self._validate_int_param(method, param_name, param_value, param_config)
             
+            # Validate list parameters
+            elif expected_type == list and param_value is not None:
+                self._validate_list_param(method, param_name, param_value, param_config)
+            
             validated_params[param_name] = param_value
         
         logger.debug(f"Parameters validated for method '{method}': {validated_params}")
@@ -186,10 +208,14 @@ class RequestRouter:
         # Validate specific string formats
         if param_name == "email_id":
             self._validate_email_id(value)
-        elif param_name == "folder":
-            self._validate_folder_name(value)
+        elif param_name == "folder_id":
+            self._validate_folder_id(value)
         elif param_name == "query":
             self._validate_search_query(value)
+        elif param_name == "body_format":
+            self._validate_body_format(value)
+        elif param_name == "importance":
+            self._validate_importance(value)
     
     def _validate_int_param(self, method: str, param_name: str, value: int, config: Dict[str, Any]) -> None:
         """Validate integer parameter constraints."""
@@ -220,7 +246,7 @@ class RequestRouter:
             raise ValidationError("Email ID contains invalid characters")
     
     def _validate_folder_name(self, folder_name: str) -> None:
-        """Validate folder name format."""
+        """Validate folder name format - allows Unicode characters including Chinese."""
         if not folder_name or not folder_name.strip():
             raise ValidationError("Folder name cannot be empty")
         
@@ -229,9 +255,31 @@ class RequestRouter:
             raise ValidationError("Folder name is too long")
         
         # Check for invalid folder name characters (Windows/Outlook restrictions)
+        # Only reject characters that are actually problematic for Outlook
+        # Allow Unicode characters (including Chinese, Japanese, Korean, etc.)
         invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|']
-        if any(char in folder_name for char in invalid_chars):
-            raise ValidationError(f"Folder name contains invalid characters: {invalid_chars}")
+        problematic_chars = [char for char in folder_name if char in invalid_chars]
+        if problematic_chars:
+            raise ValidationError(f"Folder name contains invalid characters: {problematic_chars}")
+        
+        # Check for control characters (ASCII 0-31) but allow Unicode
+        control_chars = [char for char in folder_name if ord(char) < 32]
+        if control_chars:
+            raise ValidationError(f"Folder name contains control characters")
+    
+    def _validate_folder_id(self, folder_id: str) -> None:
+        """Validate folder ID format."""
+        if not folder_id or not folder_id.strip():
+            raise ValidationError("Folder ID cannot be empty")
+        
+        # Folder IDs should be reasonable length (Outlook folder IDs are typically long hex strings)
+        if len(folder_id) > 500:
+            raise ValidationError("Folder ID is too long")
+        
+        # Check for potentially dangerous characters
+        dangerous_chars = ['<', '>', '"', "'", '&', '\n', '\r', '\t']
+        if any(char in folder_id for char in dangerous_chars):
+            raise ValidationError("Folder ID contains invalid characters")
     
     def _validate_search_query(self, query: str) -> None:
         """Validate search query format."""
@@ -246,6 +294,88 @@ class RequestRouter:
         # Basic validation - could be enhanced with more sophisticated query parsing
         if len(query) < 1:
             raise ValidationError("Search query must be at least 1 character long")
+    
+    def _validate_list_param(self, method: str, param_name: str, value: list, config: Dict[str, Any]) -> None:
+        """Validate list parameter constraints."""
+        # Check minimum length
+        if "min_length" in config and len(value) < config["min_length"]:
+            raise ValidationError(
+                f"Parameter '{param_name}' for method '{method}' must have at least "
+                f"{config['min_length']} items"
+            )
+        
+        # Check maximum length
+        if "max_length" in config and len(value) > config["max_length"]:
+            raise ValidationError(
+                f"Parameter '{param_name}' for method '{method}' must have at most "
+                f"{config['max_length']} items"
+            )
+        
+        # Validate email recipient lists
+        if param_name in ["to_recipients", "cc_recipients", "bcc_recipients"]:
+            self._validate_email_list(param_name, value)
+        
+        # Validate attachment lists
+        elif param_name == "attachments":
+            self._validate_attachment_list(value)
+    
+    def _validate_email_list(self, param_name: str, email_list: list) -> None:
+        """Validate list of email addresses."""
+        if not email_list:
+            return
+        
+        if len(email_list) > 100:  # Reasonable limit
+            raise ValidationError(f"{param_name} cannot have more than 100 recipients")
+        
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        
+        for i, email in enumerate(email_list):
+            if not isinstance(email, str):
+                raise ValidationError(f"{param_name}[{i}] must be a string")
+            
+            email = email.strip()
+            if not email:
+                raise ValidationError(f"{param_name}[{i}] cannot be empty")
+            
+            if not re.match(email_pattern, email):
+                raise ValidationError(f"{param_name}[{i}] is not a valid email address: {email}")
+    
+    def _validate_attachment_list(self, attachment_list: list) -> None:
+        """Validate list of attachment file paths."""
+        if not attachment_list:
+            return
+        
+        if len(attachment_list) > 20:  # Reasonable limit
+            raise ValidationError("Cannot attach more than 20 files")
+        
+        for i, attachment in enumerate(attachment_list):
+            if not isinstance(attachment, str):
+                raise ValidationError(f"attachments[{i}] must be a string file path")
+            
+            if not attachment.strip():
+                raise ValidationError(f"attachments[{i}] cannot be empty")
+            
+            # Basic path validation
+            if len(attachment) > 500:
+                raise ValidationError(f"attachments[{i}] path is too long")
+            
+            # Check for dangerous characters
+            dangerous_chars = ['<', '>', '"', '|', '\n', '\r', '\t']
+            if any(char in attachment for char in dangerous_chars):
+                raise ValidationError(f"attachments[{i}] contains invalid characters")
+    
+    def _validate_body_format(self, body_format: str) -> None:
+        """Validate email body format."""
+        valid_formats = ["html", "text", "rtf"]
+        if body_format.lower() not in valid_formats:
+            raise ValidationError(f"body_format must be one of: {valid_formats}")
+    
+    def _validate_importance(self, importance: str) -> None:
+        """Validate email importance level."""
+        valid_importance = ["low", "normal", "high"]
+        if importance.lower() not in valid_importance:
+            raise ValidationError(f"importance must be one of: {valid_importance}")
     
     def get_registered_methods(self) -> List[str]:
         """

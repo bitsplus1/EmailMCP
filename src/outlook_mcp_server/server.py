@@ -5,7 +5,7 @@ import json
 import signal
 import sys
 import time
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable, List
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
@@ -215,12 +215,15 @@ class OutlookMCPServer:
         self.logger.debug("Registering request handlers")
         
         # Register email operations
+        self.request_router.register_handler("list_inbox_emails", self._handle_list_inbox_emails)
         self.request_router.register_handler("list_emails", self._handle_list_emails)
         self.request_router.register_handler("get_email", self._handle_get_email)
         self.request_router.register_handler("search_emails", self._handle_search_emails)
+        self.request_router.register_handler("send_email", self._handle_send_email)
         
         # Register folder operations
         self.request_router.register_handler("get_folders", self._handle_get_folders)
+        self.request_router.register_handler("debug_folder_names", self._handle_debug_folder_names)
         
         self.logger.debug("Request handlers registered successfully")
     
@@ -308,7 +311,22 @@ class OutlookMCPServer:
         if not self._executor:
             raise RuntimeError("Server not properly initialized")
         
-        # Run the synchronous request routing in thread pool
+        # All email service methods are async, handle them directly
+        if request.method in ["send_email", "list_inbox_emails", "list_emails", "get_email", "search_emails"]:
+            validated_params = self.request_router.validate_params(request.method, request.params)
+            
+            if request.method == "send_email":
+                return await self._handle_send_email(**validated_params)
+            elif request.method == "list_inbox_emails":
+                return await self._handle_list_inbox_emails(**validated_params)
+            elif request.method == "list_emails":
+                return await self._handle_list_emails(**validated_params)
+            elif request.method == "get_email":
+                return await self._handle_get_email(**validated_params)
+            elif request.method == "search_emails":
+                return await self._handle_search_emails(**validated_params)
+        
+        # Run the synchronous request routing in thread pool for other methods (like get_folders)
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             self._executor,
@@ -316,25 +334,61 @@ class OutlookMCPServer:
             request
         )
     
-    def _handle_list_emails(self, folder: str = None, unread_only: bool = False, limit: int = 50) -> Dict[str, Any]:
+    async def _handle_list_inbox_emails(self, unread_only: bool = False, limit: int = 50) -> Dict[str, Any]:
+        """Handle list_inbox_emails MCP method."""
+        with self.logger.time_operation("list_inbox_emails"):
+            emails = await self.email_service.list_inbox_emails(unread_only, limit)
+            return {"emails": emails}
+    
+    async def _handle_list_emails(self, folder_id: str, unread_only: bool = False, limit: int = 50) -> Dict[str, Any]:
         """Handle list_emails MCP method."""
         with self.logger.time_operation("list_emails"):
-            return self.email_service.list_emails(folder, unread_only, limit)
+            emails = await self.email_service.list_emails(folder_id, unread_only, limit)
+            return {"emails": emails}
     
-    def _handle_get_email(self, email_id: str) -> Dict[str, Any]:
+    async def _handle_get_email(self, email_id: str) -> Dict[str, Any]:
         """Handle get_email MCP method."""
         with self.logger.time_operation("get_email"):
-            return self.email_service.get_email(email_id)
+            return await self.email_service.get_email(email_id)
     
-    def _handle_search_emails(self, query: str, folder: str = None, limit: int = 50) -> Dict[str, Any]:
+    async def _handle_search_emails(self, query: str, folder_id: str = None, limit: int = 50) -> Dict[str, Any]:
         """Handle search_emails MCP method."""
         with self.logger.time_operation("search_emails"):
-            return self.email_service.search_emails(query, folder, limit)
+            return await self.email_service.search_emails(query, folder_id, limit)
     
+    async def _handle_send_email(self, 
+                               to_recipients: List[str], 
+                               subject: str, 
+                               body: str, 
+                               cc_recipients: List[str] = None,
+                               bcc_recipients: List[str] = None,
+                               body_format: str = "html",
+                               importance: str = "normal",
+                               attachments: List[str] = None,
+                               save_to_sent_items: bool = True) -> Dict[str, Any]:
+        """Handle send_email MCP method."""
+        with self.logger.time_operation("send_email"):
+            return await self.email_service.send_email(
+                to_recipients=to_recipients,
+                subject=subject,
+                body=body,
+                cc_recipients=cc_recipients,
+                bcc_recipients=bcc_recipients,
+                body_format=body_format,
+                importance=importance,
+                attachments=attachments,
+                save_to_sent_items=save_to_sent_items
+            )
+
     def _handle_get_folders(self) -> Dict[str, Any]:
         """Handle get_folders MCP method."""
         with self.logger.time_operation("get_folders"):
             return {"folders": self.folder_service.get_folders()}
+    
+    def _handle_debug_folder_names(self) -> Dict[str, Any]:
+        """Handle debug_folder_names MCP method."""
+        with self.logger.time_operation("debug_folder_names"):
+            return self.folder_service.debug_folder_names()
     
     def _update_stats(self, success: bool) -> None:
         """Update server statistics."""

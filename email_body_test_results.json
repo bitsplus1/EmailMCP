@@ -1,0 +1,1450 @@
+{
+  "total_emails": 50,
+  "emails_with_body_in_list": 42,
+  "emails_with_empty_body_in_list": 8,
+  "emails_with_body_in_get": 42,
+  "emails_with_empty_body_in_get": 8,
+  "get_email_errors": 0,
+  "detailed_results": [
+    {
+      "index": 1,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DE00000",
+      "subject": "X16 Blackhawk 11/14 TWL DVT1.0/EVT1.0 build SA daily status ",
+      "sender": "Lee. JackYC (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 2,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DDF0000",
+      "subject": "[External Mail] WPCO:WP0000257199,Esupport Acknowledgement S",
+      "sender": "US_AGILE_HELP_DESK@DELL.COM",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 599,
+        "has_content": true,
+        "total_lines": 15,
+        "non_empty_lines": 10,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r\n郵件來自外部,請謹慎確認來源、連結與附檔.\r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đín...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 599,
+        "has_content": true,
+        "total_lines": 15,
+        "non_empty_lines": 10,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r\n郵件來自外部,請謹慎確認來源、連結與附檔.\r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đín...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 3,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DDE0000",
+      "subject": "Body Extraction Debug Test - 1758630251",
+      "sender": "Lin. JackieCF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 4,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DDD0000",
+      "subject": "Body Extraction Debug Test - 1758629137",
+      "sender": "Lin. JackieCF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 5,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DDC0000",
+      "subject": "Body Extraction Debug Test - 1758627737",
+      "sender": "Lin. JackieCF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 6,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DDB0000",
+      "subject": "RE: [Blade] intel evo Audio portion",
+      "sender": "Lin. Neo (LKE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 9690,
+        "has_content": true,
+        "total_lines": 518,
+        "non_empty_lines": 149,
+        "preview": "Hi Carlos,\r\n\r\n \r\n\r\nThank you help, I have been input “Dolby Atmos” in the field for Blade decoding SW solution, thank you.\r\n\r\n \r\n\r\n\r\n\r\n \r\n\r\n \r\n\r\n \r\n\r\n \r\n\r\nBest regards\r\n\r\n \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nNeo Lin\r\n\r\n\r...",
+        "first_line": "Hi Carlos,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 9690,
+        "has_content": true,
+        "total_lines": 518,
+        "non_empty_lines": 149,
+        "preview": "Hi Carlos,\r\n\r\n \r\n\r\nThank you help, I have been input “Dolby Atmos” in the field for Blade decoding SW solution, thank you.\r\n\r\n \r\n\r\n\r\n\r\n \r\n\r\n \r\n\r\n \r\n\r\n \r\n\r\nBest regards\r\n\r\n \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nNeo Lin\r\n\r\n\r...",
+        "first_line": "Hi Carlos,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 7,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DDA0000",
+      "subject": "Body Extraction Debug Test - 1758627589",
+      "sender": "Lin. JackieCF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 190,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 5,
+        "preview": "This is a test email body for debugging body extraction. \r\n\r\nLine 1: Hello World \r\nLine 2: Testing body content \r\nLine 3: This should be visible in the extracted body. \r\n\r\nEnd of test email.",
+        "first_line": "This is a test email body for debugging body extraction. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 8,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD90000",
+      "subject": "Automated Report from N8N",
+      "sender": "Lin. JackieCF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 57,
+        "has_content": true,
+        "total_lines": 1,
+        "non_empty_lines": 1,
+        "preview": "This email was sent automatically from n8n workflow 1930.",
+        "first_line": "This email was sent automatically from n8n workflow 1930.",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 57,
+        "has_content": true,
+        "total_lines": 1,
+        "non_empty_lines": 1,
+        "preview": "This email was sent automatically from n8n workflow 1930.",
+        "first_line": "This email was sent automatically from n8n workflow 1930.",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 9,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD70000",
+      "subject": "RE: Innersphere KDP61 DVT1.0 build report---9/23",
+      "sender": "Yu. JasonYD (CIT)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 41838,
+        "has_content": true,
+        "total_lines": 5577,
+        "non_empty_lines": 1876,
+        "preview": "Hi   Isaac\r\n\r\n \r\n\r\nUpdated Innersphere KDP61 DVT1.0 Build report as below, please notice~\r\n\r\n \r\n\r\n*   Platform: Innersphere KDP61\r\n\r\n*   Phase: DVT1.0 \r\n\r\n*   Status: Green\r\n\r\n*   Cut in: 9/23 17:30\r\n...",
+        "first_line": "Hi   Isaac\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 41838,
+        "has_content": true,
+        "total_lines": 5577,
+        "non_empty_lines": 1876,
+        "preview": "Hi   Isaac\r\n\r\n \r\n\r\nUpdated Innersphere KDP61 DVT1.0 Build report as below, please notice~\r\n\r\n \r\n\r\n*   Platform: Innersphere KDP61\r\n\r\n*   Phase: DVT1.0 \r\n\r\n*   Status: Green\r\n\r\n*   Cut in: 9/23 17:30\r\n...",
+        "first_line": "Hi   Isaac\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 10,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD60000",
+      "subject": "On 9/23 day NPI KDP61 DVT1.0_Build EQM1 Test Result",
+      "sender": "Zhang. FairyZ (CIT)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 24131,
+        "has_content": true,
+        "total_lines": 2797,
+        "non_empty_lines": 1381,
+        "preview": "Dear ALL\r\n\r\n \r\n\r\n     On 9/23 day NPI KDP61 DVT1.0_Build EQM1 Test Result\r\n\r\n                                                                                                                           ...",
+        "first_line": "Dear ALL\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 24131,
+        "has_content": true,
+        "total_lines": 2797,
+        "non_empty_lines": 1381,
+        "preview": "Dear ALL\r\n\r\n \r\n\r\n     On 9/23 day NPI KDP61 DVT1.0_Build EQM1 Test Result\r\n\r\n                                                                                                                           ...",
+        "first_line": "Dear ALL\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 11,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD50000",
+      "subject": "RE: KDP61  DVT1.0 Pre  I2FA31NPI  AFT  report  9.17D",
+      "sender": "Guo. Duke (CIT)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 1232,
+        "has_content": true,
+        "total_lines": 41,
+        "non_empty_lines": 21,
+        "preview": "Dear All\r\n\r\n \r\n\r\nUpdate KDP61 DVT1.0 Pre  I2FA31NPI  AFT  report  9.17D\r\n\r\n \r\n\r\n \r\n\r\nThanks\r\n\r\nBest regards\r\n\r\nCKS PE-NPI-EE | Duke_Guo    \r\n\r\nCompal Information Technology (Kunshan) Co., Ltd.  \r\n\r\nEx...",
+        "first_line": "Dear All\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 1232,
+        "has_content": true,
+        "total_lines": 41,
+        "non_empty_lines": 21,
+        "preview": "Dear All\r\n\r\n \r\n\r\nUpdate KDP61 DVT1.0 Pre  I2FA31NPI  AFT  report  9.17D\r\n\r\n \r\n\r\n \r\n\r\nThanks\r\n\r\nBest regards\r\n\r\nCKS PE-NPI-EE | Duke_Guo    \r\n\r\nCompal Information Technology (Kunshan) Co., Ltd.  \r\n\r\nEx...",
+        "first_line": "Dear All\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 12,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD40000",
+      "subject": "Automated Report from N8N",
+      "sender": "Lin. JackieCF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 57,
+        "has_content": true,
+        "total_lines": 1,
+        "non_empty_lines": 1,
+        "preview": "This email was sent automatically from n8n workflow 1930.",
+        "first_line": "This email was sent automatically from n8n workflow 1930.",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 57,
+        "has_content": true,
+        "total_lines": 1,
+        "non_empty_lines": 1,
+        "preview": "This email was sent automatically from n8n workflow 1930.",
+        "first_line": "This email was sent automatically from n8n workflow 1930.",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 13,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD30000",
+      "subject": "Innersphere 16 KDP61 Safe launch report ----0923",
+      "sender": "Lu. Simon (CIT)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 353,
+        "has_content": true,
+        "total_lines": 19,
+        "non_empty_lines": 8,
+        "preview": "Hi Isaac,\r\n\r\n  Updating Innersphere 16 KDP61 Safe launch report for your reference , thanks!\r\n\r\n \r\n\r\nSincerely,\r\n\r\n \r\n\r\nCKS NPI-JQE | Simon_Lu    \r\n\r\nCompal Information Technology (Kunshan) Co., Ltd. ...",
+        "first_line": "Hi Isaac,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 353,
+        "has_content": true,
+        "total_lines": 19,
+        "non_empty_lines": 8,
+        "preview": "Hi Isaac,\r\n\r\n  Updating Innersphere 16 KDP61 Safe launch report for your reference , thanks!\r\n\r\n \r\n\r\nSincerely,\r\n\r\n \r\n\r\nCKS NPI-JQE | Simon_Lu    \r\n\r\nCompal Information Technology (Kunshan) Co., Ltd. ...",
+        "first_line": "Hi Isaac,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 14,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD20000",
+      "subject": "[External Mail] RE: Raise Pri for Bug 1180387/58940579 [Dell",
+      "sender": "Microsoft ESupport (Do Not Reply)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 53950,
+        "has_content": true,
+        "total_lines": 447,
+        "non_empty_lines": 158,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 53950,
+        "has_content": true,
+        "total_lines": 447,
+        "non_empty_lines": 158,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 15,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD10000",
+      "subject": "[External Mail] Extended Regular Deadline Ends in 3 Days – A",
+      "sender": "European Product Design Award",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 7144,
+        "has_content": true,
+        "total_lines": 80,
+        "non_empty_lines": 41,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 7144,
+        "has_content": true,
+        "total_lines": 80,
+        "non_empty_lines": 41,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 16,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DD00000",
+      "subject": "【提醒Reminder】轉型旅程–Boost CCM （Culture Change Module）文化變革主要階段模組",
+      "sender": "HQHRD_Culture",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 4668,
+        "has_content": true,
+        "total_lines": 112,
+        "non_empty_lines": 50,
+        "preview": "親愛的同仁們，\r\n\r\nBoost CCM 2 於8/11（一）正式啟動，為期 12 週，目前已邁入 第 7 週，感謝大家的投入與參與！\r\n\r\n本階段我們聚焦「賦能授權 Empowerment」下的三大目標行為：為成功鋪路、保持開放心態、輔導以提高績效。\r\n\r\n提醒大家 持續每日登入 APP 完成學習活動，保持穩定的學習節奏。即使只是花一點時間，也能累積落實核心價值的正面影響。\r\n\r\n「Boost ...",
+        "first_line": "親愛的同仁們，\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 4668,
+        "has_content": true,
+        "total_lines": 112,
+        "non_empty_lines": 50,
+        "preview": "親愛的同仁們，\r\n\r\nBoost CCM 2 於8/11（一）正式啟動，為期 12 週，目前已邁入 第 7 週，感謝大家的投入與參與！\r\n\r\n本階段我們聚焦「賦能授權 Empowerment」下的三大目標行為：為成功鋪路、保持開放心態、輔導以提高績效。\r\n\r\n提醒大家 持續每日登入 APP 完成學習活動，保持穩定的學習節奏。即使只是花一點時間，也能累積落實核心價值的正面影響。\r\n\r\n「Boost ...",
+        "first_line": "親愛的同仁們，\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 17,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCF0000",
+      "subject": "[External Mail] 您有 1 則訊息，1 次提及",
+      "sender": "Teams 中有新活動",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 2458,
+        "has_content": true,
+        "total_lines": 31,
+        "non_empty_lines": 21,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 2458,
+        "has_content": true,
+        "total_lines": 31,
+        "non_empty_lines": 21,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 18,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCE0000",
+      "subject": "人員懲處公告(Penalty Announcement)",
+      "sender": "#COMPAL_Bulletin",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 319,
+        "has_content": true,
+        "total_lines": 15,
+        "non_empty_lines": 6,
+        "preview": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r\n\r\n \r\n\r\n________________________________\r\n\r\n發文字號/ File Number：ＡＢ００００Ａ２５０７８號/ AB0000A25078\r\n\r\n主    旨/ Subject...",
+        "first_line": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 319,
+        "has_content": true,
+        "total_lines": 15,
+        "non_empty_lines": 6,
+        "preview": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r\n\r\n \r\n\r\n________________________________\r\n\r\n發文字號/ File Number：ＡＢ００００Ａ２５０７８號/ AB0000A25078\r\n\r\n主    旨/ Subject...",
+        "first_line": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 19,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCD0000",
+      "subject": "人員獎勵公告(Award Announcement)",
+      "sender": "#COMPAL_Bulletin",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 516,
+        "has_content": true,
+        "total_lines": 27,
+        "non_empty_lines": 10,
+        "preview": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r\n\r\n \r\n\r\n________________________________\r\n\r\n發文字號/ File Number：ＡＢ００００Ａ２５０７５號/ AB0000A25075\r\n\r\n主    旨/ Subject...",
+        "first_line": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 516,
+        "has_content": true,
+        "total_lines": 27,
+        "non_empty_lines": 10,
+        "preview": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r\n\r\n \r\n\r\n________________________________\r\n\r\n發文字號/ File Number：ＡＢ００００Ａ２５０７５號/ AB0000A25075\r\n\r\n主    旨/ Subject...",
+        "first_line": "說明：本郵件由薪酬策略與薪資管理處申請發佈，相關問題請洽王姵涵（分機10134）If you have any question please contact  (# 10134).\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 20,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCC0000",
+      "subject": "[X17][N1X]Daily Issue status 20250923",
+      "sender": "Chen. KellyPH (LKE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 21,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCB0000",
+      "subject": "RE: [Taroko PTL_CSLP]Intel WW38-39 Panther Lake BE Beta Work",
+      "sender": "Huang. EricMF (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 61214,
+        "has_content": true,
+        "total_lines": 1646,
+        "non_empty_lines": 782,
+        "preview": "Hi All,\r\n\r\n \r\n\r\nPlease refer to the WW39.2 status update for Taroko PTL CSLP BE Beta workshop.\r\n\r\n \r\n\r\nGeneral Status\r\n\r\n•        Workshop sighting Open: 3 Wait formal release + Closed: 4\r\n\r\n•        ...",
+        "first_line": "Hi All,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 61214,
+        "has_content": true,
+        "total_lines": 1646,
+        "non_empty_lines": 782,
+        "preview": "Hi All,\r\n\r\n \r\n\r\nPlease refer to the WW39.2 status update for Taroko PTL CSLP BE Beta workshop.\r\n\r\n \r\n\r\nGeneral Status\r\n\r\n•        Workshop sighting Open: 3 Wait formal release + Closed: 4\r\n\r\n•        ...",
+        "first_line": "Hi All,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 22,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCA0000",
+      "subject": "RE: [Blade] intel evo Audio portion",
+      "sender": "Liao. Carlos (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 8301,
+        "has_content": true,
+        "total_lines": 455,
+        "non_empty_lines": 134,
+        "preview": "Hello @Lin. Neo (LKE) <mailto:Neo_Lin@compal.com> ,\r\n\r\n \r\n\r\nJust to confirm, is your screenshot of “decoding premium content” referring to this additional innovation item (marked as orange color) ? \r\n...",
+        "first_line": "Hello @Lin. Neo (LKE) <mailto:Neo_Lin@compal.com> ,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 8301,
+        "has_content": true,
+        "total_lines": 455,
+        "non_empty_lines": 134,
+        "preview": "Hello @Lin. Neo (LKE) <mailto:Neo_Lin@compal.com> ,\r\n\r\n \r\n\r\nJust to confirm, is your screenshot of “decoding premium content” referring to this additional innovation item (marked as orange color) ? \r\n...",
+        "first_line": "Hello @Lin. Neo (LKE) <mailto:Neo_Lin@compal.com> ,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 23,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC90000",
+      "subject": "RE: 請閱讀【深耕計畫】2025/09/25深耕(SA)Leveraging AI to Transform Trad",
+      "sender": "Lin. Ruby (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 9887,
+        "has_content": true,
+        "total_lines": 807,
+        "non_empty_lines": 333,
+        "preview": "Dear Jackie\r\n\r\n收到，謝謝\r\n\r\n \r\n\r\nBest Regards\r\n\r\n林佳霈 Ruby Lin\r\n\r\n工程支援處 ESD / 知識學習部 KLD\r\n\r\nTel:(02)8797-8588 <Tel:(02)8797-8588>   #16932\r\n\r\n仁寶電腦工業股份有限公司 \r\n\r\n \r\n\r\nFrom: Lin. JackieCF (TPE) <JackieCF_Lin@co...",
+        "first_line": "Dear Jackie\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 9887,
+        "has_content": true,
+        "total_lines": 807,
+        "non_empty_lines": 333,
+        "preview": "Dear Jackie\r\n\r\n收到，謝謝\r\n\r\n \r\n\r\nBest Regards\r\n\r\n林佳霈 Ruby Lin\r\n\r\n工程支援處 ESD / 知識學習部 KLD\r\n\r\nTel:(02)8797-8588 <Tel:(02)8797-8588>   #16932\r\n\r\n仁寶電腦工業股份有限公司 \r\n\r\n \r\n\r\nFrom: Lin. JackieCF (TPE) <JackieCF_Lin@co...",
+        "first_line": "Dear Jackie\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 24,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC80000",
+      "subject": "[SoP] How to use remote desktop",
+      "sender": "Lin. Harris (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 25,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC70000",
+      "subject": "RE: UD list maintain rule adjustment",
+      "sender": "Chiu. AllenHC (LKE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 4451,
+        "has_content": true,
+        "total_lines": 429,
+        "non_empty_lines": 170,
+        "preview": "Share to SA1/SA2 UD owners \r\n\r\n \r\n\r\nFrom: Chen. Stephanie (LKE) <Stephanie_Chen@compal.com> \r\nSent: Tuesday, September 23, 2025 3:04 PM\r\nTo: #RD_A31LKE_SA <RD_A31LKE_SA3@compal.com>\r\nCc: Lee. Mark (LK...",
+        "first_line": "Share to SA1/SA2 UD owners \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 4451,
+        "has_content": true,
+        "total_lines": 429,
+        "non_empty_lines": 170,
+        "preview": "Share to SA1/SA2 UD owners \r\n\r\n \r\n\r\nFrom: Chen. Stephanie (LKE) <Stephanie_Chen@compal.com> \r\nSent: Tuesday, September 23, 2025 3:04 PM\r\nTo: #RD_A31LKE_SA <RD_A31LKE_SA3@compal.com>\r\nCc: Lee. Mark (LK...",
+        "first_line": "Share to SA1/SA2 UD owners \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 26,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC60000",
+      "subject": "RE: [Blade14/16] Internal EIV Weekly Meeting",
+      "sender": "Meng. Robert (PCP)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 33423,
+        "has_content": true,
+        "total_lines": 816,
+        "non_empty_lines": 368,
+        "preview": "Hi all,\r\n\r\n \r\n\r\n \r\n\r\n1.\tDTC list by 9/22 COB including the 2nd list\r\n\r\nExcept RF, any more DTC item? \r\n\r\n Blade_DTC List_v1.xlsx <https://compal1.sharepoint.com/:x:/s/Teams_A31_Blade/Ec8pv6DUbyZPuzVWn...",
+        "first_line": "Hi all,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 33423,
+        "has_content": true,
+        "total_lines": 816,
+        "non_empty_lines": 368,
+        "preview": "Hi all,\r\n\r\n \r\n\r\n \r\n\r\n1.\tDTC list by 9/22 COB including the 2nd list\r\n\r\nExcept RF, any more DTC item? \r\n\r\n Blade_DTC List_v1.xlsx <https://compal1.sharepoint.com/:x:/s/Teams_A31_Blade/Ec8pv6DUbyZPuzVWn...",
+        "first_line": "Hi all,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 27,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC40000",
+      "subject": "[RDDS] <KDB40/KDB44/KDI44/KDI47> BIOS 2.13.0 Release Notific",
+      "sender": "rdds_system",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 28,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC30000",
+      "subject": "RE: Raise Pri for Bug 1180387/58940579 [Dell][Renegade_PTL][",
+      "sender": "Wang. PaulHC (LKE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 48715,
+        "has_content": true,
+        "total_lines": 428,
+        "non_empty_lines": 149,
+        "preview": "Hi ESupport,\r\n\r\n\r\nSorry, could we know is there have any further progress from the FT?\r\n\r\n\r\nThanks,\r\n\r\nBest regards.\r\n\r\n \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nPaulHC_Wang\r\n\r\n\r\n\r\n(TW)+886-3-2618111 #19572\r\n\r\n\r\n\r\n[goo.gl] <h...",
+        "first_line": "Hi ESupport,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 48715,
+        "has_content": true,
+        "total_lines": 428,
+        "non_empty_lines": 149,
+        "preview": "Hi ESupport,\r\n\r\n\r\nSorry, could we know is there have any further progress from the FT?\r\n\r\n\r\nThanks,\r\n\r\nBest regards.\r\n\r\n \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nPaulHC_Wang\r\n\r\n\r\n\r\n(TW)+886-3-2618111 #19572\r\n\r\n\r\n\r\n[goo.gl] <h...",
+        "first_line": "Hi ESupport,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 29,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC20000",
+      "subject": "RE: Innersphere Dell机器紧急出货waive OBE1&2以及记录cosmetic issue",
+      "sender": "Wu. Herry (CIT)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 2726,
+        "has_content": true,
+        "total_lines": 107,
+        "non_empty_lines": 49,
+        "preview": "Hi   Ruilong/Cunfu\r\n\r\n \r\n\r\n以下DELL机器，还请帮忙包装出货，感谢！\r\n\r\nSERIAL_NUMBER\r\n\r\nNPI_DC\r\n\r\nMO_NUMBER\r\n\r\nGROUP_NAME\r\n\r\nKEY_PART_NO\r\n\r\n8016895600003\r\n\r\nTPE\r\n\r\n80168956\r\n\r\nSWDL\r\n\r\nKDP61010009\r\n\r\n \r\n\r\nFrom: Chou. Ale...",
+        "first_line": "Hi   Ruilong/Cunfu\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 2726,
+        "has_content": true,
+        "total_lines": 107,
+        "non_empty_lines": 49,
+        "preview": "Hi   Ruilong/Cunfu\r\n\r\n \r\n\r\n以下DELL机器，还请帮忙包装出货，感谢！\r\n\r\nSERIAL_NUMBER\r\n\r\nNPI_DC\r\n\r\nMO_NUMBER\r\n\r\nGROUP_NAME\r\n\r\nKEY_PART_NO\r\n\r\n8016895600003\r\n\r\nTPE\r\n\r\n80168956\r\n\r\nSWDL\r\n\r\nKDP61010009\r\n\r\n \r\n\r\nFrom: Chou. Ale...",
+        "first_line": "Hi   Ruilong/Cunfu\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 30,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC10000",
+      "subject": "RE: Innersphere Dell机器紧急出货waive OBE1&2以及记录cosmetic issue",
+      "sender": "Chou. Alex (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 1318,
+        "has_content": true,
+        "total_lines": 71,
+        "non_empty_lines": 32,
+        "preview": "Hi Jason\r\n\r\n \r\n\r\nI will waiver it for this urgent shipment, please process next step continue.\r\n\r\n \r\n\r\nBest Wishes\r\n\r\nCompal Electronic, INC.\r\n\r\nPMD2 Alex_Chou \r\n\r\nTEL : +886-2-87978599 ext 16057\r\n\r\ne...",
+        "first_line": "Hi Jason\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 1318,
+        "has_content": true,
+        "total_lines": 71,
+        "non_empty_lines": 32,
+        "preview": "Hi Jason\r\n\r\n \r\n\r\nI will waiver it for this urgent shipment, please process next step continue.\r\n\r\n \r\n\r\nBest Wishes\r\n\r\nCompal Electronic, INC.\r\n\r\nPMD2 Alex_Chou \r\n\r\nTEL : +886-2-87978599 ext 16057\r\n\r\ne...",
+        "first_line": "Hi Jason\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 31,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC00000",
+      "subject": "RE: Slate / Blade / Congo / Vision_AMD GPP _PDL--before 9/22",
+      "sender": "Yan. Zarco (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 6258,
+        "has_content": true,
+        "total_lines": 327,
+        "non_empty_lines": 101,
+        "preview": "Hi Elma,\r\n\r\n \r\n\r\nDepends on our checking, PDL between PTL and GPP CPU can not  share for Slate.\r\n\r\nThanks.\r\n\r\n　\r\n\r\nPDL Check\r\n\r\nHW\r\n\r\n \r\n\r\nStorage\r\n\r\n \r\n\r\nRF\r\n\r\ncan not  share\r\n\r\nLCD\r\n\r\nSame\r\n\r\nCamera...",
+        "first_line": "Hi Elma,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 6258,
+        "has_content": true,
+        "total_lines": 327,
+        "non_empty_lines": 101,
+        "preview": "Hi Elma,\r\n\r\n \r\n\r\nDepends on our checking, PDL between PTL and GPP CPU can not  share for Slate.\r\n\r\nThanks.\r\n\r\n　\r\n\r\nPDL Check\r\n\r\nHW\r\n\r\n \r\n\r\nStorage\r\n\r\n \r\n\r\nRF\r\n\r\ncan not  share\r\n\r\nLCD\r\n\r\nSame\r\n\r\nCamera...",
+        "first_line": "Hi Elma,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 32,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DBF0000",
+      "subject": "Innersphere Dell机器紧急出货waive OBE1&2以及记录cosmetic issue",
+      "sender": "Yu. JasonYD (CIT)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 304,
+        "has_content": true,
+        "total_lines": 42,
+        "non_empty_lines": 19,
+        "preview": "Hi   Alex\r\n\r\n \r\n\r\n如谈，因客户出货需求紧急，为了满足9/24号出货，需要同意waive以下机器OBE1&2以及记录cosmetic issue\r\n\r\nSERIAL_NUMBER\r\n\r\nNPI_DC\r\n\r\nMO_NUMBER\r\n\r\nGROUP_NAME\r\n\r\nERROR_FLAG\r\n\r\nNEXT_STATION\r\n\r\nMODEL_NAME\r\n\r\nKEY_PART_NO\r\n\r\n801...",
+        "first_line": "Hi   Alex\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 304,
+        "has_content": true,
+        "total_lines": 42,
+        "non_empty_lines": 19,
+        "preview": "Hi   Alex\r\n\r\n \r\n\r\n如谈，因客户出货需求紧急，为了满足9/24号出货，需要同意waive以下机器OBE1&2以及记录cosmetic issue\r\n\r\nSERIAL_NUMBER\r\n\r\nNPI_DC\r\n\r\nMO_NUMBER\r\n\r\nGROUP_NAME\r\n\r\nERROR_FLAG\r\n\r\nNEXT_STATION\r\n\r\nMODEL_NAME\r\n\r\nKEY_PART_NO\r\n\r\n801...",
+        "first_line": "Hi   Alex\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 33,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DBE0000",
+      "subject": "RE: [Blade] intel evo Audio portion",
+      "sender": "Liao. Carlos (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 7125,
+        "has_content": true,
+        "total_lines": 425,
+        "non_empty_lines": 124,
+        "preview": "+ more SA \r\n\r\n \r\n\r\n \r\n\r\nHi Vincent,\r\n\r\n \r\n\r\nI have a question. I am not sure which type of audio software solution is used for decoding premium content. \r\n\r\nWould Dolby Atmos and IntelliGo be consider...",
+        "first_line": "+ more SA \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 7125,
+        "has_content": true,
+        "total_lines": 425,
+        "non_empty_lines": 124,
+        "preview": "+ more SA \r\n\r\n \r\n\r\n \r\n\r\nHi Vincent,\r\n\r\n \r\n\r\nI have a question. I am not sure which type of audio software solution is used for decoding premium content. \r\n\r\nWould Dolby Atmos and IntelliGo be consider...",
+        "first_line": "+ more SA \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 34,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DBD0000",
+      "subject": "[X16][LNL][ARL][RPL]Daily Issue status 20250923",
+      "sender": "Yu. Mason (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 35,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DBC0000",
+      "subject": "RE: Slate / Blade / Congo / Vision_AMD GPP _PDL--before 9/22",
+      "sender": "Lin. LawrenceLR (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 4899,
+        "has_content": true,
+        "total_lines": 249,
+        "non_empty_lines": 75,
+        "preview": "Hi Elma,\r\n\r\n \r\n\r\nFYI.\r\n\r\n \r\n\r\n　\r\n\r\nPDL Check\r\n\r\nHW\r\n\r\n \r\n\r\nStorage\r\n\r\n \r\n\r\nRF\r\n\r\n \r\n\r\nLCD\r\n\r\nSame\r\n\r\nCamera\r\n\r\n \r\n\r\nTP/FPR\r\n\r\n \r\n\r\nKB\r\n\r\n \r\n\r\nBattery\r\n\r\n \r\n\r\nSpeaker\r\n\r\n \r\n\r\nThermal\r\n\r\n \r\n\r\n \r\n\r\n \r\n\r\n...",
+        "first_line": "Hi Elma,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 4899,
+        "has_content": true,
+        "total_lines": 249,
+        "non_empty_lines": 75,
+        "preview": "Hi Elma,\r\n\r\n \r\n\r\nFYI.\r\n\r\n \r\n\r\n　\r\n\r\nPDL Check\r\n\r\nHW\r\n\r\n \r\n\r\nStorage\r\n\r\n \r\n\r\nRF\r\n\r\n \r\n\r\nLCD\r\n\r\nSame\r\n\r\nCamera\r\n\r\n \r\n\r\nTP/FPR\r\n\r\n \r\n\r\nKB\r\n\r\n \r\n\r\nBattery\r\n\r\n \r\n\r\nSpeaker\r\n\r\n \r\n\r\nThermal\r\n\r\n \r\n\r\n \r\n\r\n \r\n\r\n...",
+        "first_line": "Hi Elma,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 36,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DBB0000",
+      "subject": "【公告】績效新制即將啟動－自述階段重點說明｜績效發展 x 人才共進",
+      "sender": "#COMPAL_Bulletin",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 490,
+        "has_content": true,
+        "total_lines": 21,
+        "non_empty_lines": 7,
+        "preview": "說明：本郵件由全球組織暨人才發展本部申請發佈。\r\n\r\n \r\n\r\n🔎 職能體系查詢：仁寶首頁/系統專區/知識資訊庫/仁寶員工學習網→職能體系 <http://tpewww/Compal/Tpe/Adm/Training/syllabus2/k000.htm>  \r\n\r\n🔎 績效自述說明影片：仁寶首頁/系統專區/知識資訊庫/仁寶員工學習網→人才發展/績效管理辦法 <http://tpewww/Comp...",
+        "first_line": "說明：本郵件由全球組織暨人才發展本部申請發佈。\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 490,
+        "has_content": true,
+        "total_lines": 21,
+        "non_empty_lines": 7,
+        "preview": "說明：本郵件由全球組織暨人才發展本部申請發佈。\r\n\r\n \r\n\r\n🔎 職能體系查詢：仁寶首頁/系統專區/知識資訊庫/仁寶員工學習網→職能體系 <http://tpewww/Compal/Tpe/Adm/Training/syllabus2/k000.htm>  \r\n\r\n🔎 績效自述說明影片：仁寶首頁/系統專區/知識資訊庫/仁寶員工學習網→人才發展/績效管理辦法 <http://tpewww/Comp...",
+        "first_line": "說明：本郵件由全球組織暨人才發展本部申請發佈。\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 37,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB90000",
+      "subject": "[Gen 17][Renegade MLK][Manuel] 99.0.10_EVT /99.1.10_DVT1 BIO",
+      "sender": "Sie. Storen (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 38,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB80000",
+      "subject": "[External Mail] VESA 2025 研討會:：參與台北 · 深圳 · 首爾的 DisplayPort v",
+      "sender": "GRL Taiwan",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 10944,
+        "has_content": true,
+        "total_lines": 93,
+        "non_empty_lines": 44,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 10944,
+        "has_content": true,
+        "total_lines": 93,
+        "non_empty_lines": 44,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 39,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB70000",
+      "subject": "[External Mail] [2025 September] intel Integrated Graphics I",
+      "sender": "peg_gfx_ce_communications",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 19688,
+        "has_content": true,
+        "total_lines": 477,
+        "non_empty_lines": 214,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 19688,
+        "has_content": true,
+        "total_lines": 477,
+        "non_empty_lines": 214,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 40,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB60000",
+      "subject": "[External Mail] Recall: [2025 September] intel Integrated Gr",
+      "sender": "Hsu, Belle",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 328,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 4,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r\n郵件來自外部,請謹慎確認來源、連結與附檔.\r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đín...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 328,
+        "has_content": true,
+        "total_lines": 7,
+        "non_empty_lines": 4,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r\n郵件來自外部,請謹慎確認來源、連結與附檔.\r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đín...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment.\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 41,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB50000",
+      "subject": "[External Mail] [2025 September] intel Integrated Graphics I",
+      "sender": "Hsu, Belle",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 19688,
+        "has_content": true,
+        "total_lines": 477,
+        "non_empty_lines": 214,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 19688,
+        "has_content": true,
+        "total_lines": 477,
+        "non_empty_lines": 214,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 42,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB40000",
+      "subject": "RE: Slate / Blade / Congo / Vision_AMD GPP _PDL--before 9/22",
+      "sender": "Chen. LeonGM (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 4778,
+        "has_content": true,
+        "total_lines": 205,
+        "non_empty_lines": 65,
+        "preview": "Hi All,\r\n\r\n \r\n\r\n請每個單位都要畫押! 避免疏漏了!\r\n\r\n謝謝\r\n\r\n \r\n\r\nCG1 / PM \r\n\r\nLeonGM Chen\r\n\r\nCompal Electronics, Inc.\r\n\r\nMail: LeonGM_Chen@compal.com <mailto:LeonGM_Chen@compal.com> \r\n\r\nTEL: +886-2-8797-8588 <tel:+886...",
+        "first_line": "Hi All,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 4778,
+        "has_content": true,
+        "total_lines": 205,
+        "non_empty_lines": 65,
+        "preview": "Hi All,\r\n\r\n \r\n\r\n請每個單位都要畫押! 避免疏漏了!\r\n\r\n謝謝\r\n\r\n \r\n\r\nCG1 / PM \r\n\r\nLeonGM Chen\r\n\r\nCompal Electronics, Inc.\r\n\r\nMail: LeonGM_Chen@compal.com <mailto:LeonGM_Chen@compal.com> \r\n\r\nTEL: +886-2-8797-8588 <tel:+886...",
+        "first_line": "Hi All,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 43,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB30000",
+      "subject": "RE: On 9/20 day NPI KDP61 DVT1.0_Build EQM1 Test Result",
+      "sender": "Hsieh. David (LKE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 20389,
+        "has_content": true,
+        "total_lines": 1654,
+        "non_empty_lines": 804,
+        "preview": "Hi Alex,\r\n\r\nFeedback as attached.\r\n\r\n\r\n\r\n \r\n\r\n \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nDavid Hsieh \r\n\r\n\r\n\r\n <https://goo.gl/maps/yJberzkHxD9fmgHSA> \r\n\r\nFROM VISION TO REALITY Innovation Empowered\r\n\r\n\r\n\r\nDisplays/ HW Tech. \r\n...",
+        "first_line": "Hi Alex,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 20389,
+        "has_content": true,
+        "total_lines": 1654,
+        "non_empty_lines": 804,
+        "preview": "Hi Alex,\r\n\r\nFeedback as attached.\r\n\r\n\r\n\r\n \r\n\r\n \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nDavid Hsieh \r\n\r\n\r\n\r\n <https://goo.gl/maps/yJberzkHxD9fmgHSA> \r\n\r\nFROM VISION TO REALITY Innovation Empowered\r\n\r\n\r\n\r\nDisplays/ HW Tech. \r\n...",
+        "first_line": "Hi Alex,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 44,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB20000",
+      "subject": "<SA2>MSFT document_Windows Manufacturing 25H2 RTM Update",
+      "sender": "Lin. Carrie (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 45,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB10000",
+      "subject": "活動即將開始!【迎向國際手語日】無聲咖啡館！9/23中午我們不見不散",
+      "sender": "#COMPAL_Bulletin",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 499,
+        "has_content": true,
+        "total_lines": 29,
+        "non_empty_lines": 13,
+        "preview": "什麼！？原來雙手也能對話？\r\n\r\n手語不只是個手勢，它更是一種語言，\r\n\r\n能讓我們貼近聽障朋友的生活，讓我們看見另一種溝通的可能\r\n\r\n9/23(二) 11:30 ~ 12:30 邀請你來參加『無聲咖啡館』，\r\n\r\n在國際手語日的前夕，用幾個簡單的手語兌換飲品，\r\n\r\n搶先體驗不一樣的語言之美吧！\r\n\r\n（數量有限，換完為止）\r\n\r\n手語教學傳送門： https://forms.gle/f1rd...",
+        "first_line": "什麼！？原來雙手也能對話？\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 499,
+        "has_content": true,
+        "total_lines": 29,
+        "non_empty_lines": 13,
+        "preview": "什麼！？原來雙手也能對話？\r\n\r\n手語不只是個手勢，它更是一種語言，\r\n\r\n能讓我們貼近聽障朋友的生活，讓我們看見另一種溝通的可能\r\n\r\n9/23(二) 11:30 ~ 12:30 邀請你來參加『無聲咖啡館』，\r\n\r\n在國際手語日的前夕，用幾個簡單的手語兌換飲品，\r\n\r\n搶先體驗不一樣的語言之美吧！\r\n\r\n（數量有限，換完為止）\r\n\r\n手語教學傳送門： https://forms.gle/f1rd...",
+        "first_line": "什麼！？原來雙手也能對話？\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 46,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB00000",
+      "subject": "RE: Slate / Blade / Congo / Vision_AMD GPP _PDL--before 9/22",
+      "sender": "Shek. Elma (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 3645,
+        "has_content": true,
+        "total_lines": 173,
+        "non_empty_lines": 52,
+        "preview": "Hi All,\r\n\r\nPlease help promptly verify whether the PDL for Slate AMD is correct for the functions listed below. The current PDLs were generated based on Slate PTL, so please make sure to correct any i...",
+        "first_line": "Hi All,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 3645,
+        "has_content": true,
+        "total_lines": 173,
+        "non_empty_lines": 52,
+        "preview": "Hi All,\r\n\r\nPlease help promptly verify whether the PDL for Slate AMD is correct for the functions listed below. The current PDLs were generated based on Slate PTL, so please make sure to correct any i...",
+        "first_line": "Hi All,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 47,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DAE0000",
+      "subject": "[External Mail] 全新Breaker解決方案-匯流排自動化測試，輕鬆掌握系統可靠性！",
+      "sender": "誠芯技術",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 2113,
+        "has_content": true,
+        "total_lines": 62,
+        "non_empty_lines": 29,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 2113,
+        "has_content": true,
+        "total_lines": 62,
+        "non_empty_lines": 29,
+        "preview": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r\n郵件來自外部,請謹慎確認來源、連結與附檔. \r\nEmail từ bên ngoài, Vui lòng cẩn thận xác nhận nguồn gốc, liên kết và tệp đ...",
+        "first_line": "The email is from outside, please be careful to confirm the mail source, hyperlink and attachment. \r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 48,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DAD0000",
+      "subject": "RE: [Slate GPT 14] Feature Matrix v0.51 released, need team ",
+      "sender": "Lin. LawrenceLR (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 1399,
+        "has_content": true,
+        "total_lines": 79,
+        "non_empty_lines": 26,
+        "preview": "Hi Leon,\r\n\r\n \r\n\r\nPanel team already update to teams folder.\r\n\r\n \r\n\r\nThanks.\r\n\r\n \r\n\r\nLawrenceLR Lin\r\n\r\nCOMPAL ELECTRONICS, INC. | DED, Display Engineering Dept.\r\n\r\nOffice +886(0)2 2658-6288 #17722\r\n\r\nL...",
+        "first_line": "Hi Leon,\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 1399,
+        "has_content": true,
+        "total_lines": 79,
+        "non_empty_lines": 26,
+        "preview": "Hi Leon,\r\n\r\n \r\n\r\nPanel team already update to teams folder.\r\n\r\n \r\n\r\nThanks.\r\n\r\n \r\n\r\nLawrenceLR Lin\r\n\r\nCOMPAL ELECTRONICS, INC. | DED, Display Engineering Dept.\r\n\r\nOffice +886(0)2 2658-6288 #17722\r\n\r\nL...",
+        "first_line": "Hi Leon,\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 49,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DAC0000",
+      "subject": "RE: On 9/20 day NPI KDP61 DVT1.0_Build EQM1 Test Result",
+      "sender": "Chou. Alex (TPE)",
+      "list_body_analysis": {
+        "status": "has_content",
+        "length": 17615,
+        "has_content": true,
+        "total_lines": 1607,
+        "non_empty_lines": 790,
+        "preview": "Hi Devily, Ben, David\r\n\r\n \r\n\r\n Please check the yellow color portion and feedback your suggestion for OBE issue in today.\r\n\r\n \r\n\r\nBest Wishes\r\n\r\nCompal Electronic, INC.\r\n\r\nPMD2 Alex_Chou \r\n\r\nTEL : +88...",
+        "first_line": "Hi Devily, Ben, David\r",
+        "is_html": false
+      },
+      "get_body_analysis": {
+        "status": "has_content",
+        "length": 17615,
+        "has_content": true,
+        "total_lines": 1607,
+        "non_empty_lines": 790,
+        "preview": "Hi Devily, Ben, David\r\n\r\n \r\n\r\n Please check the yellow color portion and feedback your suggestion for OBE issue in today.\r\n\r\n \r\n\r\nBest Wishes\r\n\r\nCompal Electronic, INC.\r\n\r\nPMD2 Alex_Chou \r\n\r\nTEL : +88...",
+        "first_line": "Hi Devily, Ben, David\r",
+        "is_html": false
+      },
+      "has_body_issue": false
+    },
+    {
+      "index": 50,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DAB0000",
+      "subject": "RE:  X17 Renegade PTL DVT1.0 build SA daily status update - ",
+      "sender": "Chen. SamYSC (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    }
+  ],
+  "problematic_emails": [
+    {
+      "index": 1,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DE00000",
+      "subject": "X16 Blackhawk 11/14 TWL DVT1.0/EVT1.0 build SA daily status ",
+      "sender": "Lee. JackYC (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 20,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DCC0000",
+      "subject": "[X17][N1X]Daily Issue status 20250923",
+      "sender": "Chen. KellyPH (LKE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 24,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC80000",
+      "subject": "[SoP] How to use remote desktop",
+      "sender": "Lin. Harris (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 27,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DC40000",
+      "subject": "[RDDS] <KDB40/KDB44/KDI44/KDI47> BIOS 2.13.0 Release Notific",
+      "sender": "rdds_system",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 34,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DBD0000",
+      "subject": "[X16][LNL][ARL][RPL]Daily Issue status 20250923",
+      "sender": "Yu. Mason (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 37,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB90000",
+      "subject": "[Gen 17][Renegade MLK][Manuel] 99.0.10_EVT /99.1.10_DVT1 BIO",
+      "sender": "Sie. Storen (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 44,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DB20000",
+      "subject": "<SA2>MSFT document_Windows Manufacturing 25H2 RTM Update",
+      "sender": "Lin. Carrie (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    },
+    {
+      "index": 50,
+      "email_id": "00000000DB2820C5F3F8204492F273035529BA6807009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000C8F3FCAAA615D740A192DA27F69F25450000365C4DAB0000",
+      "subject": "RE:  X17 Renegade PTL DVT1.0 build SA daily status update - ",
+      "sender": "Chen. SamYSC (TPE)",
+      "list_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "get_body_analysis": {
+        "status": "empty",
+        "length": 0,
+        "has_content": false,
+        "preview": ""
+      },
+      "has_body_issue": true
+    }
+  ]
+}

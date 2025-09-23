@@ -42,16 +42,27 @@ class MCPHTTPRequestHandler(BaseHTTPRequestHandler):
                 request_data = json.loads(post_data.decode('utf-8'))
                 self.logger.debug(f"Received HTTP MCP request: {request_data}")
                 
-                # Process the request asynchronously
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                # Initialize COM for this thread
+                import pythoncom
+                pythoncom.CoInitialize()
                 
                 try:
-                    response = loop.run_until_complete(
-                        self.mcp_server.handle_request(request_data)
-                    )
+                    # Process the request asynchronously
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    try:
+                        response = loop.run_until_complete(
+                            self.mcp_server.handle_request(request_data)
+                        )
+                    finally:
+                        loop.close()
                 finally:
-                    loop.close()
+                    # Clean up COM
+                    try:
+                        pythoncom.CoUninitialize()
+                    except:
+                        pass  # Ignore cleanup errors
                 
                 # Send response
                 self.send_response(200)

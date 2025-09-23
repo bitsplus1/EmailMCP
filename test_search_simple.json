@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "test-search-simple",
+  "method": "search_emails",
+  "params": {
+    "query": "test",
+    "limit": 3
+  }
+}

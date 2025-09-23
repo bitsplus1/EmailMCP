@@ -2,6 +2,7 @@
 
 import logging
 import re
+import time
 from datetime import datetime
 from typing import Optional, List, Any, Tuple
 from unittest.mock import Mock
@@ -11,7 +12,8 @@ from ..models.exceptions import (
     OutlookConnectionError,
     FolderNotFoundError,
     EmailNotFoundError,
-    PermissionError
+    PermissionError,
+    ValidationError
 )
 from ..models.folder_data import FolderData
 from ..models.email_data import EmailData
@@ -187,6 +189,132 @@ class OutlookAdapter:
         
         return self._namespace
     
+    def get_folder_by_id(self, folder_id: str) -> Any:
+        """
+        Get folder by ID from Outlook.
+        
+        Args:
+            folder_id: ID of the folder to retrieve
+            
+        Returns:
+            COM object: The folder object
+            
+        Raises:
+            OutlookConnectionError: If not connected to Outlook
+            FolderNotFoundError: If folder is not found
+            PermissionError: If access to folder is denied
+        """
+        if not self.is_connected():
+            raise OutlookConnectionError("Not connected to Outlook")
+        
+        if not folder_id or not isinstance(folder_id, str):
+            raise FolderNotFoundError(folder_id or "")
+        
+        try:
+            logger.debug(f"Looking for folder by ID: {folder_id}")
+            
+            # Use existing namespace to avoid COM threading issues
+            # Get main folders and check their IDs
+            main_folders = [
+                (6, "Inbox"),           # olFolderInbox
+                (5, "Sent Items"),      # olFolderSentMail  
+                (16, "Drafts"),         # olFolderDrafts
+                (3, "Deleted Items"),   # olFolderDeletedItems
+                (4, "Outbox"),          # olFolderOutbox
+                (9, "Calendar"),        # olFolderCalendar
+                (10, "Contacts"),       # olFolderContacts
+                (13, "Journal"),        # olFolderJournal
+                (12, "Tasks")           # olFolderTasks
+            ]
+            
+            for folder_id_num, folder_name in main_folders:
+                try:
+                    folder = self._namespace.GetDefaultFolder(folder_id_num)
+                    if folder and hasattr(folder, 'EntryID'):
+                        if folder.EntryID == folder_id:
+                            logger.debug(f"Found folder by ID: {folder_id} -> {folder_name}")
+                            return folder
+                except Exception as e:
+                    logger.debug(f"Error checking folder {folder_name}: {e}")
+                    continue
+                
+            
+            # If not found in default folders, we could search all folders but that's expensive
+            # For now, just check if it's one of the default folders we missed
+                
+            logger.warning(f"Folder not found by ID: {folder_id}")
+            raise FolderNotFoundError(folder_id)
+                
+        except FolderNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error accessing folder by ID '{folder_id}': {str(e)}")
+            if "access" in str(e).lower() or "permission" in str(e).lower():
+                raise PermissionError(folder_id, f"Access denied to folder ID '{folder_id}'")
+            raise FolderNotFoundError(folder_id)
+    
+    def _search_folder_by_id_recursive(self, folder: Any, target_id: str) -> Optional[Any]:
+        """
+        Recursively search for a folder by ID.
+        
+        Args:
+            folder: The folder to search in
+            target_id: ID of the target folder
+            
+        Returns:
+            COM object or None: The found folder or None if not found
+        """
+        try:
+            # Check if current folder matches
+            if hasattr(folder, 'EntryID') and folder.EntryID == target_id:
+                return folder
+            
+            # Search in subfolders
+            if hasattr(folder, 'Folders'):
+                for subfolder in folder.Folders:
+                    result = self._search_folder_by_id_recursive(subfolder, target_id)
+                    if result:
+                        return result
+            
+            return None
+            
+        except Exception as e:
+            logger.debug(f"Error searching in folder by ID: {str(e)}")
+            return None
+    
+    def get_folder_by_name_or_id(self, identifier: str) -> Any:
+        """
+        Get folder by name or ID from Outlook.
+        
+        Args:
+            identifier: Name or ID of the folder to retrieve
+            
+        Returns:
+            COM object: The folder object
+            
+        Raises:
+            OutlookConnectionError: If not connected to Outlook
+            FolderNotFoundError: If folder is not found
+            PermissionError: If access to folder is denied
+        """
+        if not self.is_connected():
+            raise OutlookConnectionError("Not connected to Outlook")
+        
+        if not identifier or not isinstance(identifier, str):
+            raise FolderNotFoundError(identifier or "")
+        
+        # First try as folder ID (if it looks like an EntryID - long hex string)
+        if len(identifier) > 50 and all(c in '0123456789ABCDEFabcdef' for c in identifier):
+            logger.debug(f"Identifier looks like folder ID, trying ID lookup: {identifier[:20]}...")
+            try:
+                return self.get_folder_by_id(identifier)
+            except FolderNotFoundError:
+                logger.debug(f"Not found as ID, trying as name: {identifier[:20]}...")
+        
+        # Try as folder name
+        logger.debug(f"Trying as folder name: {identifier}")
+        return self.get_folder_by_name(identifier)
+    
     def get_folder_by_name(self, name: str) -> Any:
         """
         Get folder by name from Outlook.
@@ -212,21 +340,68 @@ class OutlookAdapter:
             logger.debug(f"Looking for folder: {name}")
             
             # Try to get folder by name
-            # First check default folders
+            # First check default folders with localized names
             default_folders = {
+                # English names
                 "Inbox": 6,      # olFolderInbox
                 "Outbox": 4,     # olFolderOutbox
                 "Sent Items": 5, # olFolderSentMail
                 "Deleted Items": 3, # olFolderDeletedItems
                 "Drafts": 16,    # olFolderDrafts
-                "Junk Email": 23 # olFolderJunk
+                "Junk Email": 23, # olFolderJunk
+                # Chinese Traditional names
+                "收件匣": 6,      # olFolderInbox
+                "收件夾": 6,      # olFolderInbox (alternative)
+                "寄件匣": 4,      # olFolderOutbox
+                "寄件備份": 5,    # olFolderSentMail
+                "已傳送的郵件": 5, # olFolderSentMail (alternative)
+                "刪除的郵件": 3,  # olFolderDeletedItems
+                "已刪除的郵件": 3, # olFolderDeletedItems (alternative)
+                "草稿": 16,      # olFolderDrafts
+                "垃圾郵件": 23,   # olFolderJunk
+                # Chinese Simplified names
+                "收件箱": 6,      # olFolderInbox
+                "发件箱": 4,      # olFolderOutbox
+                "已发送邮件": 5,  # olFolderSentMail
+                "已删除邮件": 3,  # olFolderDeletedItems
+                "草稿箱": 16,     # olFolderDrafts
+                "垃圾邮件": 23,   # olFolderJunk
+                # Japanese names
+                "受信トレイ": 6,   # olFolderInbox
+                "送信トレイ": 4,   # olFolderOutbox
+                "送信済みアイテム": 5, # olFolderSentMail
+                "削除済みアイテム": 3, # olFolderDeletedItems
+                "下書き": 16,     # olFolderDrafts
+                "迷惑メール": 23,  # olFolderJunk
             }
             
+            # Try exact match first
             if name in default_folders:
-                folder = self._namespace.GetDefaultFolder(default_folders[name])
-                if folder:
-                    logger.debug(f"Found default folder: {name}")
-                    return folder
+                try:
+                    folder = self._namespace.GetDefaultFolder(default_folders[name])
+                    if folder:
+                        logger.debug(f"Found default folder by exact match: {name}")
+                        return folder
+                except Exception as e:
+                    logger.debug(f"Error accessing default folder {name}: {e}")
+            
+            # Try to get default folders and match by actual name
+            try:
+                logger.debug(f"Trying to match folder name '{name}' with actual folder names")
+                for folder_id in [6, 5, 4, 3, 16, 23]:  # Common default folders
+                    try:
+                        folder = self._namespace.GetDefaultFolder(folder_id)
+                        if folder and hasattr(folder, 'Name'):
+                            actual_name = folder.Name
+                            logger.debug(f"Checking folder ID {folder_id}: '{actual_name}' vs '{name}'")
+                            if actual_name == name:
+                                logger.debug(f"Found default folder by name match: {name} (ID: {folder_id})")
+                                return folder
+                    except Exception as e:
+                        logger.debug(f"Error checking folder ID {folder_id}: {e}")
+                        continue
+            except Exception as e:
+                logger.debug(f"Error during folder name matching: {e}")
             
             # If not a default folder, search through all folders
             folders = self._namespace.Folders
@@ -571,6 +746,58 @@ class OutlookAdapter:
             logger.debug(f"Error validating folder access: {str(e)}")
             return False
     
+    def get_default_folder_names(self) -> dict:
+        """
+        Get the actual names of default Outlook folders for debugging.
+        
+        Returns:
+            dict: Mapping of folder IDs to actual folder names
+        """
+        if not self.is_connected():
+            return {}
+        
+        folder_names = {}
+        default_folder_ids = {
+            6: "Inbox",
+            5: "Sent Items", 
+            4: "Outbox",
+            3: "Deleted Items",
+            16: "Drafts",
+            23: "Junk Email",
+            9: "Calendar",
+            10: "Contacts",
+            13: "Journal",
+            12: "Tasks"
+        }
+        
+        for folder_id, english_name in default_folder_ids.items():
+            try:
+                folder = self._namespace.GetDefaultFolder(folder_id)
+                if folder and hasattr(folder, 'Name'):
+                    actual_name = folder.Name
+                    folder_names[folder_id] = {
+                        'english_name': english_name,
+                        'actual_name': actual_name,
+                        'accessible': True
+                    }
+                    logger.debug(f"Default folder {folder_id} ({english_name}): '{actual_name}'")
+                else:
+                    folder_names[folder_id] = {
+                        'english_name': english_name,
+                        'actual_name': None,
+                        'accessible': False
+                    }
+            except Exception as e:
+                folder_names[folder_id] = {
+                    'english_name': english_name,
+                    'actual_name': None,
+                    'accessible': False,
+                    'error': str(e)
+                }
+                logger.debug(f"Error accessing folder {folder_id} ({english_name}): {e}")
+        
+        return folder_names
+    
     def get_email_by_id(self, email_id: str) -> EmailData:
         """
         Get detailed email information by ID from Outlook.
@@ -586,21 +813,153 @@ class OutlookAdapter:
             EmailNotFoundError: If email is not found or invalid ID
             PermissionError: If access to email is denied
         """
+        logger.info(f"🔧 DEBUG: *** GET_EMAIL_BY_ID CALLED *** ID: {email_id[:50]}...")
+        
         if not self.is_connected():
+            logger.info(f"🔧 DEBUG: Not connected to Outlook")
             raise OutlookConnectionError("Not connected to Outlook")
         
         if not email_id or not isinstance(email_id, str):
+            logger.info(f"🔧 DEBUG: Invalid email_id: {email_id}")
             raise EmailNotFoundError(email_id or "")
         
         # Validate email ID format
         if not EmailData.validate_email_id(email_id):
+            logger.info(f"🔧 DEBUG: Email ID validation failed: {email_id}")
             raise EmailNotFoundError(email_id)
         
         try:
-            logger.debug(f"Retrieving detailed email with ID: {email_id}")
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            logger.info(f"🔧 DEBUG: COM initialized for get_email_by_id")
             
-            # Try to get the email item by EntryID
-            email_item = self._namespace.GetItemFromID(email_id)
+            logger.debug(f"Retrieving detailed email with ID: {email_id}")
+            logger.info(f"🔧 DEBUG: About to create thread-local Outlook connection")
+            
+            # Create thread-local Outlook connection (same as list_inbox_emails)
+            try:
+                logger.info(f"🔧 DEBUG: Creating thread-local Outlook connection")
+                outlook_app = win32com.client.Dispatch("Outlook.Application")
+                namespace = outlook_app.GetNamespace("MAPI")
+                
+                logger.debug("Created thread-local Outlook connection for get_email_by_id")
+                logger.info(f"🔧 DEBUG: Thread-local connection created successfully")
+                
+            except Exception as e:
+                logger.error(f"Failed to create thread-local Outlook connection: {e}")
+                logger.info(f"🔧 DEBUG: Falling back to original namespace")
+                # Fall back to original namespace
+                namespace = self._namespace
+            
+            # CRITICAL FIX: Instead of using GetItemFromID (which doesn't work properly),
+            # find the email by searching through the inbox using the same method as list_inbox_emails
+            logger.debug("Using list-based approach to find email (more reliable than GetItemFromID)")
+            logger.info(f"🔧 DEBUG: Starting email search process")
+            
+            email_item = None
+            
+            # Get all emails from inbox using the working method
+            try:
+                logger.info(f"🔧 DEBUG: Getting namespace folders")
+                # Get inbox folder using the same reliable method as list_inbox_emails
+                try:
+                    folders = namespace.Folders
+                    logger.info(f"🔧 DEBUG: Got {folders.Count} folders")
+                except Exception as e:
+                    logger.info(f"🔧 DEBUG: Error accessing namespace.Folders: {e}")
+                    raise e
+                inbox_folder = None
+                
+                for f in folders:
+                    try:
+                        if hasattr(f, 'Items') and hasattr(f, 'Name'):
+                            folder_name = f.Name
+                            logger.info(f"🔧 DEBUG: Checking folder: {folder_name}")
+                            
+                            # Check if this is the inbox folder directly
+                            if ("收件" in folder_name or "inbox" in folder_name.lower() or "æ¶ä»¶" in folder_name):
+                                inbox_folder = f
+                                logger.debug(f"Found inbox folder: {folder_name}")
+                                logger.info(f"🔧 DEBUG: Found inbox folder: {folder_name}")
+                                break
+                            
+                            # Check if this is a user mailbox folder that contains subfolders
+                            elif "@" in folder_name and not folder_name.startswith("公用"):
+                                logger.info(f"🔧 DEBUG: Checking subfolders in mailbox: {folder_name}")
+                                try:
+                                    subfolders = f.Folders
+                                    logger.info(f"🔧 DEBUG: Found {subfolders.Count} subfolders in {folder_name}")
+                                    for sf in subfolders:
+                                        try:
+                                            if hasattr(sf, 'Items') and hasattr(sf, 'Name'):
+                                                subfolder_name = sf.Name
+                                                logger.info(f"🔧 DEBUG: Checking subfolder: {subfolder_name}")
+                                                if ("收件" in subfolder_name or "inbox" in subfolder_name.lower() or "æ¶ä»¶" in subfolder_name):
+                                                    inbox_folder = sf
+                                                    logger.debug(f"Found inbox subfolder: {subfolder_name}")
+                                                    logger.info(f"🔧 DEBUG: Found inbox subfolder: {subfolder_name}")
+                                                    break
+                                        except Exception as e:
+                                            logger.info(f"🔧 DEBUG: Error checking subfolder: {e}")
+                                            continue
+                                    if inbox_folder:
+                                        break
+                                except Exception as e:
+                                    logger.info(f"🔧 DEBUG: Error accessing subfolders of {folder_name}: {e}")
+                                    continue
+                    except Exception as e:
+                        logger.debug(f"Error checking folder: {e}")
+                        logger.info(f"🔧 DEBUG: Error checking folder: {e}")
+                        continue
+                
+                if not inbox_folder:
+                    logger.info(f"🔧 DEBUG: No inbox folder found!")
+                    raise FolderNotFoundError("Inbox")
+                
+                logger.info(f"🔧 DEBUG: Inbox folder found, proceeding with search")
+                
+                # Try Method 1: Use Outlook's GetItemFromID (most reliable)
+                try:
+                    logger.debug(f"Trying GetItemFromID for: {email_id[:50]}...")
+                    email_item = namespace.GetItemFromID(email_id)
+                    if email_item and hasattr(email_item, 'Class') and email_item.Class == 43:
+                        logger.debug(f"✅ Found email using GetItemFromID")
+                    else:
+                        logger.debug(f"❌ GetItemFromID returned invalid item")
+                        email_item = None
+                except Exception as e:
+                    logger.debug(f"❌ GetItemFromID failed: {e}")
+                    email_item = None
+                
+                # Method 2: If GetItemFromID fails, search through inbox items
+                if not email_item:
+                    logger.debug(f"🔍 Falling back to inbox search...")
+                    items = inbox_folder.Items
+                    logger.debug(f"📧 Searching through {items.Count} inbox items...")
+                    
+                    checked_count = 0
+                    for item in items:
+                        try:
+                            checked_count += 1
+                            if checked_count <= 5:  # Log first 5 for debugging
+                                item_id = getattr(item, 'EntryID', 'NO_ID')
+                                logger.debug(f"   Item {checked_count}: {item_id[:50]}...")
+                            
+                            if (hasattr(item, 'EntryID') and 
+                                hasattr(item, 'Class') and 
+                                item.Class == 43 and  # olMail
+                                item.EntryID == email_id):
+                                email_item = item
+                                logger.debug(f"✅ Found email by ID in inbox search (item {checked_count})")
+                                break
+                        except Exception as e:
+                            logger.debug(f"Error checking item {checked_count}: {e}")
+                            continue
+                    
+                    logger.debug(f"📊 Searched {checked_count} items, found: {'YES' if email_item else 'NO'}")
+                        
+            except Exception as e:
+                logger.debug(f"Error finding email in inbox: {e}")
             
             if not email_item:
                 logger.warning(f"Email not found: {email_id}")
@@ -611,8 +970,17 @@ class OutlookAdapter:
                 logger.warning(f"Item is not a mail item: {email_id}")
                 raise EmailNotFoundError(email_id)
             
-            # Transform to detailed EmailData with enhanced content extraction
-            email_data = self._transform_email_to_detailed_data(email_item)
+            # Transform to EmailData using the same method as list_inbox_emails (which works)
+            folder_name = "Unknown"
+            try:
+                # Try to get folder name from the email's parent folder
+                parent_folder = getattr(email_item, 'Parent', None)
+                if parent_folder:
+                    folder_name = getattr(parent_folder, 'Name', 'Unknown')
+            except Exception as e:
+                logger.debug(f"Could not get folder name: {e}")
+            
+            email_data = self._transform_email_to_data(email_item, folder_name)
             
             logger.debug(f"Successfully retrieved detailed email: {email_id}")
             return email_data
@@ -631,14 +999,70 @@ class OutlookAdapter:
                 raise EmailNotFoundError(email_id)
             
             raise EmailNotFoundError(email_id)
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
     
-    def search_emails(self, query: str, folder_name: str = None, limit: int = 50) -> List[EmailData]:
+    def _find_email_by_id_in_folders(self, email_id: str, namespace) -> Any:
+        """
+        Find an email by ID by searching through all folders.
+        This is a fallback method when GetItemFromID fails.
+        
+        Args:
+            email_id: The email ID to search for
+            namespace: The Outlook namespace to search in
+            
+        Returns:
+            Email item if found, None otherwise
+        """
+        try:
+            logger.debug(f"Searching for email ID {email_id[:20]}... in all folders")
+            
+            # Get all folders
+            folders = namespace.Folders
+            
+            for folder in folders:
+                try:
+                    if hasattr(folder, 'Items'):
+                        items = folder.Items
+                        
+                        # Search through items in this folder (limit to first 100 for performance)
+                        count = 0
+                        for item in items:
+                            if count >= 100:  # Limit search for performance
+                                break
+                            try:
+                                if (hasattr(item, 'EntryID') and 
+                                    hasattr(item, 'Class') and 
+                                    item.Class == 43 and  # olMail
+                                    item.EntryID == email_id):
+                                    logger.debug(f"Found email in folder: {folder.Name}")
+                                    return item
+                                count += 1
+                            except Exception as e:
+                                logger.debug(f"Error checking item: {e}")
+                                continue
+                                
+                except Exception as e:
+                    logger.debug(f"Error searching folder: {e}")
+                    continue
+            
+            logger.debug(f"Email ID {email_id[:20]}... not found in any folder")
+            return None
+            
+        except Exception as e:
+            logger.debug(f"Error in folder search: {e}")
+            return None
+    
+    def search_emails(self, query: str, folder_identifier: str = None, limit: int = 50) -> List[EmailData]:
         """
         Search emails based on query with enhanced functionality.
         
         Args:
             query: Search query string
-            folder_name: Optional folder name to search in (searches all accessible folders if None)
+            folder_identifier: Optional folder name or ID to search in (searches all accessible folders if None)
             limit: Maximum number of results to return (default: 50)
             
         Returns:
@@ -665,14 +1089,14 @@ class OutlookAdapter:
             limit = 50  # Default limit
         
         try:
-            logger.debug(f"Searching emails with query: '{query}', folder: {folder_name or 'all folders'}, limit: {limit}")
+            logger.debug(f"Searching emails with query: '{query}', folder: {folder_identifier or 'all folders'}, limit: {limit}")
             
             # Process search query to ensure Outlook compatibility
             processed_query = self._process_search_query(query)
             
-            if folder_name:
-                # Search in specific folder
-                return self._search_in_folder(processed_query, folder_name, limit)
+            if folder_identifier:
+                # Search in specific folder (by name or ID)
+                return self._search_in_folder(processed_query, folder_identifier, limit)
             else:
                 # Search across all accessible folders
                 return self._search_all_folders(processed_query, limit)
@@ -682,7 +1106,7 @@ class OutlookAdapter:
         except Exception as e:
             logger.error(f"Error searching emails: {str(e)}")
             if "access" in str(e).lower() or "permission" in str(e).lower():
-                raise PermissionError(folder_name or "folders", f"Access denied during search: {str(e)}")
+                raise PermissionError(folder_identifier or "folders", f"Access denied during search: {str(e)}")
             return []
     
     def _process_search_query(self, query: str) -> str:
@@ -711,26 +1135,48 @@ class OutlookAdapter:
             logger.debug(f"Error processing search query: {str(e)}")
             return query  # Return original query if processing fails
     
-    def _search_in_folder(self, query: str, folder_name: str, limit: int) -> List[EmailData]:
+    def _search_in_folder(self, query: str, folder_identifier: str, limit: int) -> List[EmailData]:
         """
         Search emails in a specific folder.
         
         Args:
             query: Processed search query
-            folder_name: Name of the folder to search in
+            folder_identifier: Name or ID of the folder to search in
             limit: Maximum number of results to return
             
         Returns:
             List[EmailData]: List of matching email data objects
         """
         try:
-            # Get the target folder
-            folder = self.get_folder_by_name(folder_name)
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            
+            # Create thread-local Outlook connection
+            try:
+                outlook_app = win32com.client.Dispatch("Outlook.Application")
+                namespace = outlook_app.GetNamespace("MAPI")
+                
+                logger.debug("Created thread-local Outlook connection for search")
+                
+            except Exception as e:
+                logger.error(f"Failed to create thread-local Outlook connection: {e}")
+                # Fall back to original namespace
+                namespace = self._namespace
+            
+            # Get the target folder (by name or ID) using thread-local connection
+            if len(folder_identifier) > 50 and all(c in '0123456789ABCDEFabcdef' for c in folder_identifier):
+                # This looks like a folder ID
+                folder = self._get_folder_by_id_thread_local(folder_identifier, namespace)
+            else:
+                # This is a folder name
+                folder = self._get_folder_by_name_thread_local(folder_identifier, namespace)
             
             if not folder:
-                raise FolderNotFoundError(folder_name)
+                raise FolderNotFoundError(folder_identifier)
             
-            logger.debug(f"Searching in folder: {folder_name}")
+            # Get the actual folder name for logging
+            folder_name = getattr(folder, 'Name', folder_identifier)
+            logger.debug(f"Searching in folder: {folder_name} (identifier: {folder_identifier})")
             
             # Perform search in the folder
             results = self._perform_folder_search(folder, query, limit, folder_name)
@@ -741,10 +1187,15 @@ class OutlookAdapter:
         except (FolderNotFoundError, PermissionError):
             raise
         except Exception as e:
-            logger.error(f"Error searching in folder '{folder_name}': {str(e)}")
+            logger.error(f"Error searching in folder '{folder_identifier}': {str(e)}")
             if "access" in str(e).lower() or "permission" in str(e).lower():
-                raise PermissionError(folder_name, f"Access denied to folder '{folder_name}': {str(e)}")
+                raise PermissionError(folder_identifier, f"Access denied to folder '{folder_identifier}': {str(e)}")
             return []
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
     
     def _search_all_folders(self, query: str, limit: int) -> List[EmailData]:
         """
@@ -868,60 +1319,173 @@ class OutlookAdapter:
             # Sort by received time (newest first) for consistent results
             items.Sort("[ReceivedTime]", True)  # True for descending order
             
-            # Use Outlook's Find method to search
-            found_item = items.Find(query)
-            
             results = []
             count = 0
             
-            # Collect search results with safety counter to prevent infinite loops
-            max_iterations = limit * 10  # Safety limit to prevent infinite loops
-            iteration_count = 0
+            # Parse the search query to extract search terms and fields
+            search_terms = self._parse_search_query(query)
             
-            while found_item and count < limit and iteration_count < max_iterations:
-                iteration_count += 1
+            logger.debug(f"Searching folder '{folder_name}' with terms: {search_terms}")
+            
+            # Manual search through items (more reliable than Outlook's Find method)
+            items_checked = 0
+            max_items_to_check = min(1000, items.Count)  # Limit for performance
+            
+            for item in items:
+                if count >= limit or items_checked >= max_items_to_check:
+                    break
+                
+                items_checked += 1
                 
                 try:
                     # Check if it's a mail item (type 43 = olMail)
-                    if hasattr(found_item, 'Class') and found_item.Class == 43:
+                    if not hasattr(item, 'Class') or item.Class != 43:
+                        continue
+                    
+                    # Check if item matches search criteria
+                    if self._item_matches_search(item, search_terms):
                         # Transform to EmailData
-                        email_data = self._transform_email_to_data(found_item, folder_name)
+                        email_data = self._transform_email_to_data(item, folder_name)
                         results.append(email_data)
                         count += 1
                     
-                    # Get next result
-                    found_item = items.FindNext()
-                    
                 except Exception as e:
-                    logger.debug(f"Error processing search result: {str(e)}")
-                    # Try to get next result
-                    try:
-                        found_item = items.FindNext()
-                    except:
-                        break
+                    logger.debug(f"Error processing item in search: {str(e)}")
                     continue
             
-            if iteration_count >= max_iterations:
-                logger.warning(f"Search in folder '{folder_name}' hit iteration limit, may have more results")
-            
-            logger.debug(f"Search in folder '{folder_name}' returned {len(results)} results")
+            logger.debug(f"Search in folder '{folder_name}' checked {items_checked} items, found {len(results)} matches")
             return results
             
         except Exception as e:
             logger.error(f"Error performing search in folder '{folder_name}': {str(e)}")
             return []
     
+    def _parse_search_query(self, query: str) -> dict:
+        """
+        Parse search query into searchable terms and fields.
+        
+        Args:
+            query: Search query string
+            
+        Returns:
+            Dictionary with search terms and target fields
+        """
+        search_terms = {
+            'subject': [],
+            'body': [],
+            'from': [],
+            'to': [],
+            'general': []
+        }
+        
+        try:
+            # Split query by common operators
+            query = query.lower().strip()
+            
+            # Handle subject: queries
+            if 'subject:' in query:
+                import re
+                subject_matches = re.findall(r'subject:(["\']?)([^"\'\s]+)\1', query)
+                for match in subject_matches:
+                    search_terms['subject'].append(match[1])
+            
+            # Handle from: queries
+            if 'from:' in query:
+                import re
+                from_matches = re.findall(r'from:(["\']?)([^"\'\s]+)\1', query)
+                for match in from_matches:
+                    search_terms['from'].append(match[1])
+            
+            # Handle body: queries
+            if 'body:' in query:
+                import re
+                body_matches = re.findall(r'body:(["\']?)([^"\'\s]+)\1', query)
+                for match in body_matches:
+                    search_terms['body'].append(match[1])
+            
+            # If no specific field queries, treat as general search
+            if not any(search_terms[field] for field in ['subject', 'body', 'from']):
+                # Remove field prefixes and use as general search
+                import re
+                clean_query = re.sub(r'(subject:|body:|from:|to:)', '', query).strip()
+                if clean_query:
+                    search_terms['general'].append(clean_query)
+            
+            logger.debug(f"Parsed search terms: {search_terms}")
+            return search_terms
+            
+        except Exception as e:
+            logger.debug(f"Error parsing search query: {e}")
+            # Fallback: treat entire query as general search
+            return {'subject': [], 'body': [], 'from': [], 'to': [], 'general': [query.lower()]}
+    
+    def _item_matches_search(self, item: Any, search_terms: dict) -> bool:
+        """
+        Check if an email item matches the search criteria.
+        
+        Args:
+            item: Outlook email item
+            search_terms: Parsed search terms
+            
+        Returns:
+            True if item matches search criteria
+        """
+        try:
+            # Get item properties safely
+            subject = str(getattr(item, 'Subject', '')).lower()
+            sender_name = str(getattr(item, 'SenderName', '')).lower()
+            sender_email = str(getattr(item, 'SenderEmailAddress', '')).lower()
+            
+            # For performance, don't load body unless specifically searching for it
+            body = ""
+            if search_terms['body']:
+                body = str(getattr(item, 'Body', '')).lower()
+            
+            logger.debug(f"Checking item: subject='{subject[:50]}...', sender='{sender_name}'")
+            
+            # Check subject matches
+            for term in search_terms['subject']:
+                if term.lower() in subject:
+                    logger.debug(f"Subject match found: '{term}' in '{subject[:50]}...'")
+                    return True
+            
+            # Check body matches (only if body terms exist)
+            if search_terms['body']:
+                for term in search_terms['body']:
+                    if term.lower() in body:
+                        logger.debug(f"Body match found: '{term}'")
+                        return True
+            
+            # Check from matches
+            for term in search_terms['from']:
+                if term.lower() in sender_name or term.lower() in sender_email:
+                    logger.debug(f"From match found: '{term}' in '{sender_name}' or '{sender_email}'")
+                    return True
+            
+            # Check general matches (search in subject and sender, skip body for performance)
+            for term in search_terms['general']:
+                if (term.lower() in subject or 
+                    term.lower() in sender_name or 
+                    term.lower() in sender_email):
+                    logger.debug(f"General match found: '{term}' in subject or sender")
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            logger.debug(f"Error checking item match: {e}")
+            return False
+    
     def __enter__(self):
         """Context manager entry."""
         self.connect()
         return self
     
-    def list_emails(self, folder_name: str = None, unread_only: bool = False, limit: int = 50) -> List[EmailData]:
+    def list_inbox_emails(self, unread_only: bool = False, limit: int = 50) -> List[EmailData]:
         """
-        List emails from specified folder with filtering options.
+        List emails from the default inbox folder.
         
         Args:
-            folder_name: Name of the folder to list emails from (None for Inbox)
             unread_only: If True, only return unread emails
             limit: Maximum number of emails to return
             
@@ -930,8 +1494,7 @@ class OutlookAdapter:
             
         Raises:
             OutlookConnectionError: If not connected to Outlook
-            FolderNotFoundError: If specified folder is not found
-            PermissionError: If access to folder is denied
+            PermissionError: If access to inbox is denied
         """
         if not self.is_connected():
             raise OutlookConnectionError("Not connected to Outlook")
@@ -940,17 +1503,75 @@ class OutlookAdapter:
             limit = 50  # Default limit
         
         try:
-            logger.debug(f"Listing emails from folder: {folder_name or 'Inbox'}, unread_only: {unread_only}, limit: {limit}")
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
             
-            # Get the target folder
-            if folder_name:
-                folder = self.get_folder_by_name(folder_name)
-            else:
-                # Default to Inbox
-                folder = self._namespace.GetDefaultFolder(6)  # olFolderInbox
+            logger.debug(f"Listing emails from inbox, unread_only: {unread_only}, limit: {limit}")
+            
+            # Create thread-local Outlook connection
+            try:
+                outlook_app = win32com.client.Dispatch("Outlook.Application")
+                namespace = outlook_app.GetNamespace("MAPI")
+                
+                logger.debug("Created thread-local Outlook connection for list_inbox_emails")
+                
+            except Exception as e:
+                logger.error(f"Failed to create thread-local Outlook connection: {e}")
+                # Fall back to original namespace
+                namespace = self._namespace
+            
+            # Get the inbox folder using the EXACT same method as list_emails
+            # Find the inbox folder by looking for the folder with Chinese name "收件匣"
+            folder = None
+            
+            # Search through all folders to find the inbox (same as list_emails logic)
+            try:
+                folders = namespace.Folders
+                max_items = 0
+                inbox_candidate = None
+                
+                for f in folders:
+                    try:
+                        if hasattr(f, 'Items') and hasattr(f, 'Name'):
+                            item_count = f.Items.Count
+                            folder_name = f.Name
+                            
+                            logger.debug(f"Checking folder: {folder_name} with {item_count} items")
+                            
+                            # Look for inbox-like names (Chinese, English, etc.)
+                            if ("收件" in folder_name or "inbox" in folder_name.lower() or 
+                                "æ¶ä»¶" in folder_name):
+                                logger.debug(f"Found inbox by name: {folder_name}")
+                                folder = f
+                                break
+                            
+                            # Also track the folder with most items as backup
+                            if item_count > max_items:
+                                max_items = item_count
+                                inbox_candidate = f
+                                
+                    except Exception as e:
+                        logger.debug(f"Error checking folder: {e}")
+                        continue
+                
+                # If we didn't find by name, use the folder with most items
+                if not folder and inbox_candidate:
+                    folder = inbox_candidate
+                    logger.debug(f"Using folder with most items as inbox: {inbox_candidate.Name} ({max_items} items)")
+                    
+            except Exception as e:
+                logger.debug(f"Error searching folders: {e}")
+            
+            # Final fallback: try GetDefaultFolder
+            if not folder:
+                logger.debug("Trying GetDefaultFolder as final fallback")
+                try:
+                    folder = namespace.GetDefaultFolder(6)  # olFolderInbox
+                except Exception as e:
+                    logger.debug(f"GetDefaultFolder failed: {e}")
             
             if not folder:
-                raise FolderNotFoundError(folder_name or "Inbox")
+                raise FolderNotFoundError("Inbox")
             
             # Get folder items
             items = folder.Items
@@ -976,7 +1597,8 @@ class OutlookAdapter:
                         continue
                     
                     # Transform email to EmailData
-                    email_data = self._transform_email_to_data(item, folder_name or "Inbox")
+                    folder_name = getattr(folder, 'Name', "Inbox")
+                    email_data = self._transform_email_to_data(item, folder_name)
                     emails.append(email_data)
                     count += 1
                     
@@ -990,10 +1612,197 @@ class OutlookAdapter:
         except (FolderNotFoundError, PermissionError):
             raise
         except Exception as e:
-            logger.error(f"Error listing emails from folder '{folder_name}': {str(e)}")
+            logger.error(f"Error listing emails from inbox: {str(e)}")
             if "access" in str(e).lower() or "permission" in str(e).lower():
-                raise PermissionError(folder_name or "Inbox", f"Access denied to folder: {str(e)}")
+                raise PermissionError("Inbox", f"Access denied to inbox: {str(e)}")
             raise OutlookConnectionError(f"Failed to list emails: {str(e)}")
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
+    
+    def list_emails(self, folder_id: str, unread_only: bool = False, limit: int = 50) -> List[EmailData]:
+        """
+        List emails from a specific folder by folder ID.
+        
+        Args:
+            folder_id: ID of the folder to list emails from
+            unread_only: If True, only return unread emails
+            limit: Maximum number of emails to return
+            
+        Returns:
+            List[EmailData]: List of email data objects
+            
+        Raises:
+            OutlookConnectionError: If not connected to Outlook
+            FolderNotFoundError: If specified folder is not found
+            PermissionError: If access to folder is denied
+            ValidationError: If folder_id is invalid
+        """
+        if not self.is_connected():
+            raise OutlookConnectionError("Not connected to Outlook")
+        
+        if not folder_id or not isinstance(folder_id, str):
+            raise ValidationError("folder_id must be a non-empty string", "folder_id")
+        
+        if limit <= 0:
+            limit = 50  # Default limit
+        
+        try:
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            
+            logger.debug(f"Listing emails from folder ID: {folder_id[:20]}..., unread_only: {unread_only}, limit: {limit}")
+            
+            # Create thread-local Outlook connection
+            try:
+                outlook_app = win32com.client.Dispatch("Outlook.Application")
+                namespace = outlook_app.GetNamespace("MAPI")
+                
+                logger.debug("Created thread-local Outlook connection for list_emails")
+                
+            except Exception as e:
+                logger.error(f"Failed to create thread-local Outlook connection: {e}")
+                # Fall back to original namespace
+                namespace = self._namespace
+            
+            # Get the folder by ID
+            folder = self._get_folder_by_id_thread_local(folder_id, namespace)
+            
+            if not folder:
+                raise FolderNotFoundError(folder_id)
+            
+            # Get folder items
+            items = folder.Items
+            
+            # Sort by received time (newest first)
+            items.Sort("[ReceivedTime]", True)  # True for descending order
+            
+            emails = []
+            count = 0
+            
+            # Iterate through items and apply filters
+            for item in items:
+                if count >= limit:
+                    break
+                
+                try:
+                    # Check if it's a mail item (type 43 = olMail)
+                    if not hasattr(item, 'Class') or item.Class != 43:
+                        continue
+                    
+                    # Apply unread filter if specified
+                    if unread_only and getattr(item, 'UnRead', True) is False:
+                        continue
+                    
+                    # Transform email to EmailData
+                    folder_name = getattr(folder, 'Name', folder_id)
+                    email_data = self._transform_email_to_data(item, folder_name)
+                    emails.append(email_data)
+                    count += 1
+                    
+                except Exception as e:
+                    logger.debug(f"Error processing email item: {str(e)}")
+                    continue
+            
+            logger.debug(f"Retrieved {len(emails)} emails from folder ID: {folder_id[:20]}...")
+            return emails
+            
+        except (FolderNotFoundError, PermissionError, ValidationError):
+            raise
+        except Exception as e:
+            logger.error(f"Error listing emails from folder ID '{folder_id[:20]}...': {str(e)}")
+            if "access" in str(e).lower() or "permission" in str(e).lower():
+                raise PermissionError(folder_id, f"Access denied to folder: {str(e)}")
+            raise OutlookConnectionError(f"Failed to list emails: {str(e)}")
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
+    
+    def _get_folder_by_id_thread_local(self, folder_id: str, namespace: Any) -> Any:
+        """
+        Get folder by ID using thread-local namespace.
+        
+        Args:
+            folder_id: ID of the folder to retrieve
+            namespace: Thread-local namespace object
+            
+        Returns:
+            COM object: The folder object
+        """
+        try:
+            logger.debug(f"Looking for folder by ID (thread-local): {folder_id[:20]}...")
+            
+            # Check main default folders
+            main_folders = [
+                (6, "Inbox"),           # olFolderInbox
+                (5, "Sent Items"),      # olFolderSentMail  
+                (16, "Drafts"),         # olFolderDrafts
+                (3, "Deleted Items"),   # olFolderDeletedItems
+                (4, "Outbox"),          # olFolderOutbox
+                (9, "Calendar"),        # olFolderCalendar
+                (10, "Contacts"),       # olFolderContacts
+                (13, "Journal"),        # olFolderJournal
+                (12, "Tasks")           # olFolderTasks
+            ]
+            
+            for folder_id_num, folder_name in main_folders:
+                try:
+                    folder = namespace.GetDefaultFolder(folder_id_num)
+                    if folder and hasattr(folder, 'EntryID'):
+                        if folder.EntryID == folder_id:
+                            logger.debug(f"Found folder by ID: {folder_id[:20]}... -> {folder_name}")
+                            return folder
+                except Exception as e:
+                    logger.debug(f"Error checking folder {folder_name}: {e}")
+                    continue
+            
+            logger.warning(f"Folder not found by ID: {folder_id[:20]}...")
+            raise FolderNotFoundError(folder_id)
+            
+        except Exception as e:
+            logger.error(f"Error in thread-local folder ID lookup: {e}")
+            raise FolderNotFoundError(folder_id)
+    
+    def _get_folder_by_name_thread_local(self, folder_name: str, namespace: Any) -> Any:
+        """
+        Get folder by name using thread-local namespace.
+        
+        Args:
+            folder_name: Name of the folder to retrieve
+            namespace: Thread-local namespace object
+            
+        Returns:
+            COM object: The folder object
+        """
+        try:
+            logger.debug(f"Looking for folder by name (thread-local): {folder_name}")
+            
+            # Try default folders first
+            default_folders = {
+                "Inbox": 6, "收件匣": 6,
+                "Sent Items": 5, "寄件備份": 5, "已傳送的郵件": 5,
+                "Drafts": 16, "草稿": 16,
+                "Deleted Items": 3, "已刪除的項目": 3,
+                "Outbox": 4, "寄件匣": 4
+            }
+            
+            if folder_name in default_folders:
+                folder_id = default_folders[folder_name]
+                folder = namespace.GetDefaultFolder(folder_id)
+                if folder:
+                    logger.debug(f"Found folder by name: {folder_name}")
+                    return folder
+            
+            logger.warning(f"Folder not found by name: {folder_name}")
+            raise FolderNotFoundError(folder_name)
+            
+        except Exception as e:
+            logger.error(f"Error in thread-local folder name lookup: {e}")
+            raise FolderNotFoundError(folder_name)
     
     def _transform_email_to_data(self, email_item: Any, folder_name: str) -> EmailData:
         """
@@ -1007,11 +1816,100 @@ class OutlookAdapter:
             EmailData: Transformed email data
         """
         try:
-            # Get basic email properties
-            email_id = getattr(email_item, 'EntryID', '')
-            subject = getattr(email_item, 'Subject', '')
-            sender_name = getattr(email_item, 'SenderName', '')
-            sender_email = getattr(email_item, 'SenderEmailAddress', '')
+            logger.info(f"🔧 DEBUG: *** TRANSFORM EMAIL TO DATA CALLED *** folder: {folder_name}")
+            logger.info(f"🔧 DEBUG: Starting email transformation for folder: {folder_name}")
+            
+            # Force COM object to load all properties by accessing them in a specific way
+            # This is critical to ensure all email properties are accessible
+            try:
+                # Force the COM object to fully initialize by accessing key properties
+                _ = email_item.Class  # Force COM object initialization
+                _ = email_item.MessageClass  # Force message type loading
+                logger.info(f"🔧 DEBUG: COM object initialized successfully")
+            except Exception as com_e:
+                logger.info(f"🔧 DEBUG: COM object initialization failed: {com_e}")
+            
+            # Get basic email properties first
+            email_id = self._get_email_property(email_item, 'EntryID', f"unknown_{id(email_item)}")
+            subject = self._get_email_property(email_item, 'Subject', '')
+            logger.info(f"🔧 DEBUG: Basic properties - ID: {email_id[:20]}..., Subject: '{subject[:50]}'")
+            
+            # Get sender information
+            sender_name = self._get_email_property(email_item, 'SenderName', '')
+            sender_email = self._get_email_property(email_item, 'SenderEmailAddress', '')
+            logger.info(f"🔧 DEBUG: Raw sender - Name: '{sender_name}', Email: '{sender_email}'")
+            logger.info(f"🔧 DEBUG: About to continue with property loading...")
+            
+            # Force property loading by trying to access them
+            try:
+                _ = email_item.Subject
+                _ = email_item.Body
+                _ = email_item.SenderName
+            except Exception as e:
+                logger.debug(f"Error forcing COM property access: {e}")
+            
+            logger.info(f"🔧 DEBUG: Property loading completed, continuing with email processing...")
+            
+            # Get basic email properties with FORCED property access
+            sender_name = ''
+            
+            try:
+                # Use direct property access with error handling
+                email_id = str(email_item.EntryID) if hasattr(email_item, 'EntryID') else ''
+            except Exception as e:
+                logger.debug(f"Error getting EntryID: {e}")
+                email_id = f"unknown_{id(email_item)}"
+            
+            try:
+                subject = str(email_item.Subject) if hasattr(email_item, 'Subject') else ''
+            except Exception as e:
+                logger.debug(f"Error getting Subject: {e}")
+                subject = '(No Subject)'
+            
+            try:
+                sender_name = str(email_item.SenderName) if hasattr(email_item, 'SenderName') else ''
+            except Exception as e:
+                logger.debug(f"Error getting SenderName: {e}")
+                sender_name = 'Unknown Sender'
+            
+            # Try multiple ways to get sender email address with FORCED access
+            sender_email = ''
+            logger.info(f"🔧 DEBUG: Starting sender email extraction methods...")
+            try:
+                # Method 1: Direct property with forced access
+                try:
+                    if hasattr(email_item, 'SenderEmailAddress'):
+                        sender_email = str(email_item.SenderEmailAddress)
+                        logger.info(f"🔧 DEBUG: Method 1 - SenderEmailAddress: '{sender_email}'")
+                except Exception as e:
+                    logger.info(f"🔧 DEBUG: Method 1 failed: {e}")
+                
+                # Method 2: If empty or invalid, try Sender property
+                if not sender_email or '@' not in sender_email:
+                    logger.info(f"🔧 DEBUG: Trying Method 2 - Sender.Address...")
+                    try:
+                        if hasattr(email_item, 'Sender'):
+                            sender_obj = email_item.Sender
+                            if sender_obj and hasattr(sender_obj, 'Address'):
+                                sender_email = str(sender_obj.Address)
+                                logger.info(f"🔧 DEBUG: Method 2 - Sender.Address: '{sender_email}'")
+                    except Exception as e:
+                        logger.debug(f"Method 2 failed: {e}")
+                
+                # Method 3: Try Reply Recipients
+                if not sender_email or '@' not in sender_email:
+                    try:
+                        if hasattr(email_item, 'ReplyRecipients'):
+                            reply_recipients = email_item.ReplyRecipients
+                            if reply_recipients and reply_recipients.Count > 0:
+                                sender_email = str(reply_recipients.Item(1).Address)
+                                logger.debug(f"Method 3 - ReplyRecipients: '{sender_email}'")
+                    except Exception as e:
+                        logger.debug(f"Method 3 failed: {e}")
+                        
+            except Exception as e:
+                logger.debug(f"Error getting sender email: {e}")
+                sender_email = ''
             
             # Ensure we have a valid ID
             if not email_id:
@@ -1022,24 +1920,153 @@ class OutlookAdapter:
             cc_recipients = []
             bcc_recipients = []
             
+            logger.info(f"🔧 DEBUG: Starting recipient extraction (duplicate section)...")
             try:
                 if hasattr(email_item, 'Recipients'):
+                    logger.info(f"🔧 DEBUG: Found {email_item.Recipients.Count} recipients in duplicate section")
                     for recipient in email_item.Recipients:
                         recipient_email = getattr(recipient, 'Address', '')
+                        recipient_name = getattr(recipient, 'Name', '')
                         recipient_type = getattr(recipient, 'Type', 1)  # 1=To, 2=CC, 3=BCC
                         
-                        if recipient_type == 1:  # To
-                            recipients.append(recipient_email)
-                        elif recipient_type == 2:  # CC
-                            cc_recipients.append(recipient_email)
-                        elif recipient_type == 3:  # BCC
-                            bcc_recipients.append(recipient_email)
+                        logger.info(f"🔧 DEBUG: Processing recipient (duplicate) - Email: '{recipient_email}', Name: '{recipient_name}', Type: {recipient_type}")
+                        
+                        # Handle Exchange internal addresses
+                        if recipient_email and (recipient_email.startswith('/o=') or recipient_email.startswith('/O=')):
+                            logger.info(f"🔧 DEBUG: Found Exchange recipient address (duplicate): '{recipient_email}' - converting...")
+                            # Convert Exchange address to valid format
+                            if recipient_name and recipient_name != recipient_email:
+                                clean_name = ''.join(c for c in recipient_name if c.isalnum() or c in '._-')
+                                recipient_email = f"{clean_name}@internal.exchange" if clean_name else "unknown@internal.exchange"
+                                logger.info(f"🔧 DEBUG: Converted recipient using name: '{recipient_email}'")
+                            else:
+                                # Extract CN from Exchange address
+                                if 'cn=' in recipient_email.lower():
+                                    try:
+                                        cn_part = recipient_email.lower().split('cn=')[-1].split('/')[0].split('-')[0]
+                                        recipient_email = f"{cn_part}@internal.exchange"
+                                        logger.info(f"🔧 DEBUG: Converted recipient using CN: '{recipient_email}'")
+                                    except:
+                                        recipient_email = "unknown@internal.exchange"
+                                        logger.info(f"🔧 DEBUG: Recipient conversion failed, using default: '{recipient_email}'")
+                                else:
+                                    recipient_email = "unknown@internal.exchange"
+                                    logger.info(f"🔧 DEBUG: No CN found in recipient, using default: '{recipient_email}'")
+                        
+                        # Only add if we have a valid email format
+                        if recipient_email and '@' in recipient_email:
+                            if recipient_type == 1:  # To
+                                recipients.append(recipient_email)
+                            elif recipient_type == 2:  # CC
+                                cc_recipients.append(recipient_email)
+                            elif recipient_type == 3:  # BCC
+                                bcc_recipients.append(recipient_email)
+                        else:
+                            logger.info(f"🔧 DEBUG: Skipping invalid recipient email: '{recipient_email}'")
             except Exception as e:
                 logger.debug(f"Error processing recipients: {str(e)}")
             
-            # Get email body
-            body = getattr(email_item, 'Body', '')
-            body_html = getattr(email_item, 'HTMLBody', '')
+            # Get email body with SIMPLIFIED and RELIABLE extraction
+            body = ''
+            body_html = ''
+            
+            try:
+                logger.debug("Starting body extraction...")
+                
+                # Method 1: Simple direct access to Body property
+                try:
+                    if hasattr(email_item, 'Body'):
+                        body_raw = email_item.Body
+                        if body_raw is not None:
+                            body = str(body_raw).strip()
+                            if body:
+                                logger.debug(f"Body extraction SUCCESS: {len(body)} chars")
+                            else:
+                                logger.debug("Body property exists but is empty")
+                        else:
+                            logger.debug("Body property is None")
+                    else:
+                        logger.debug("Email item has no Body property")
+                except Exception as e:
+                    logger.debug(f"Body access failed: {e}")
+                
+                # Method 2: Simple direct access to HTMLBody property
+                try:
+                    if hasattr(email_item, 'HTMLBody'):
+                        html_body_raw = email_item.HTMLBody
+                        if html_body_raw is not None:
+                            body_html = str(html_body_raw).strip()
+                            if body_html:
+                                logger.debug(f"HTMLBody extraction SUCCESS: {len(body_html)} chars")
+                                
+                                # If we have HTML but no plain text, extract it now
+                                if not body:
+                                    try:
+                                        import re
+                                        # Extract text from HTML
+                                        text_from_html = re.sub(r'<[^>]+>', '', body_html)
+                                        text_from_html = text_from_html.replace('&nbsp;', ' ')
+                                        text_from_html = text_from_html.replace('&lt;', '<')
+                                        text_from_html = text_from_html.replace('&gt;', '>')
+                                        text_from_html = text_from_html.replace('&amp;', '&')
+                                        text_from_html = text_from_html.strip()
+                                        
+                                        if text_from_html:
+                                            body = text_from_html
+                                            logger.debug(f"Extracted text from HTML: {len(body)} chars")
+                                    except Exception as e:
+                                        logger.debug(f"Failed to extract text from HTML: {e}")
+                            else:
+                                logger.debug("HTMLBody property exists but is empty")
+                        else:
+                            logger.debug("HTMLBody property is None")
+                    else:
+                        logger.debug("Email item has no HTMLBody property")
+                except Exception as e:
+                    logger.debug(f"HTMLBody access failed: {e}")
+                
+                # Method 3: If both are still empty, try simple COM object refresh
+                if not body and not body_html:
+                    logger.debug("Both body properties empty, trying simple refresh...")
+                    try:
+                        # Simple refresh by accessing Size property
+                        _ = email_item.Size
+                        
+                        # Try body again after refresh
+                        if hasattr(email_item, 'Body'):
+                            body_raw = email_item.Body
+                            if body_raw:
+                                body = str(body_raw).strip()
+                                logger.debug(f"Post-refresh Body: {len(body)} chars")
+                        
+                        if hasattr(email_item, 'HTMLBody'):
+                            html_body_raw = email_item.HTMLBody
+                            if html_body_raw:
+                                body_html = str(html_body_raw).strip()
+                                logger.debug(f"Post-refresh HTMLBody: {len(body_html)} chars")
+                                
+                    except Exception as e:
+                        logger.debug(f"Simple refresh failed: {e}")
+                
+
+                
+                # Final check: Log if body extraction failed
+                if not body and not body_html:
+                    try:
+                        message_class = str(email_item.MessageClass) if hasattr(email_item, 'MessageClass') else 'Unknown'
+                        email_size = getattr(email_item, 'Size', 0)
+                        
+                        logger.warning(f"Body extraction failed for: '{subject[:50]}...', MessageClass: {message_class}, Size: {email_size}")
+                        
+                        # Don't set placeholder text - leave body empty so we can identify the real issue
+                        
+                    except Exception as e:
+                        logger.debug(f"Final check failed: {e}")
+                
+            except Exception as e:
+                logger.error(f"CRITICAL ERROR in body extraction: {e}")
+                body = "[CRITICAL BODY EXTRACTION ERROR]"
+                body_html = ""
             
             # Get timestamps
             received_time = None
@@ -1069,14 +2096,15 @@ class OutlookAdapter:
             if not subject:
                 subject = "(No Subject)"
             
-            # Validate and fix sender email - use sender name if email is invalid
+            # Only use fallback email if we truly can't find the real one
             if not sender_email or '@' not in sender_email:
+                logger.debug(f"Could not find valid sender email for: {subject[:50]}...")
                 if sender_name:
-                    # Remove any invalid characters from sender name for email
+                    # Create a more recognizable placeholder
                     clean_name = ''.join(c for c in sender_name if c.isalnum() or c in '._-')
-                    sender_email = f"{clean_name}@unknown.com" if clean_name else "unknown@unknown.com"
+                    sender_email = f"{clean_name}@email-not-available.com" if clean_name else "unknown@email-not-available.com"
                 else:
-                    sender_email = "unknown@unknown.com"
+                    sender_email = "unknown@email-not-available.com"
             
             # Ensure we have a sender name
             if not sender_name:
@@ -1103,14 +2131,28 @@ class OutlookAdapter:
             
         except Exception as e:
             logger.error(f"Error transforming email to data: {str(e)}")
+            logger.info(f"🔧 DEBUG: Exception handler - creating minimal email data")
+            
             # Return minimal email data if transformation fails
             email_id = getattr(email_item, 'EntryID', f"unknown_{id(email_item)}")
             subject = getattr(email_item, 'Subject', '(No Subject)')
             sender_name = getattr(email_item, 'SenderName', 'Unknown Sender')
             sender_email = getattr(email_item, 'SenderEmailAddress', 'unknown@unknown.com')
             
+            logger.info(f"🔧 DEBUG: Exception handler - Raw sender: Name='{sender_name}', Email='{sender_email}'")
+            
+            # Handle Exchange addresses in error handler too
+            if sender_email and (sender_email.startswith('/o=') or sender_email.startswith('/O=')):
+                logger.info(f"🔧 DEBUG: Exception handler - Found Exchange address, converting...")
+                if sender_name and sender_name != sender_email:
+                    clean_name = ''.join(c for c in sender_name if c.isalnum() or c in '._-')
+                    sender_email = f"{clean_name}@internal.exchange" if clean_name else "unknown@internal.exchange"
+                else:
+                    sender_email = "unknown@internal.exchange"
+                logger.info(f"🔧 DEBUG: Exception handler - Converted to: '{sender_email}'")
+            
             # Ensure valid email format
-            if not sender_email or '@' not in sender_email:
+            elif not sender_email or '@' not in sender_email:
                 if sender_name and sender_name != 'Unknown Sender':
                     # Remove any invalid characters from sender name for email
                     clean_name = ''.join(c for c in sender_name if c.isalnum() or c in '._-')
@@ -1165,10 +2207,26 @@ class OutlookAdapter:
                 email_id = f"unknown_{id(email_item)}"
             
             # Get enhanced recipient information
-            recipients, cc_recipients, bcc_recipients = self._extract_recipients(email_item)
+            logger.info(f"🔧 DEBUG: About to extract recipients...")
+            try:
+                recipients, cc_recipients, bcc_recipients = self._extract_recipients(email_item)
+                logger.info(f"🔧 DEBUG: Recipients extracted - To: {len(recipients)}, CC: {len(cc_recipients)}, BCC: {len(bcc_recipients)}")
+            except Exception as recipient_error:
+                logger.info(f"🔧 DEBUG: Recipient extraction failed: {recipient_error}")
+                recipients, cc_recipients, bcc_recipients = [], [], []
             
             # Get email body with enhanced content extraction
+            logger.info(f"🔧 DEBUG: About to extract body...")
             body, body_html = self._extract_email_body(email_item)
+            logger.info(f"🔧 DEBUG: Body extracted - Text: {len(body)}, HTML: {len(body_html)}")
+            
+            # Additional fallback: if we have HTML but no plain text, extract text from HTML
+            if body_html and not body:
+                try:
+                    body = self._extract_text_from_html(body_html)
+                    logger.debug(f"Extracted text from HTML: {len(body)} chars")
+                except Exception as e:
+                    logger.debug(f"Failed to extract text from HTML: {e}")
             
             # Get timestamps with proper handling
             received_time, sent_time = self._extract_timestamps(email_item)
@@ -1189,9 +2247,14 @@ class OutlookAdapter:
             folder_name = self._extract_folder_name(email_item)
             
             # Validate and fix sender information
+            logger.info(f"🔧 DEBUG: About to validate sender info...")
             sender_name, sender_email = self._validate_sender_info(sender_name, sender_email)
+            logger.info(f"🔧 DEBUG: Sender validated - Name: '{sender_name}', Email: '{sender_email}'")
             
             # Create EmailData with all extracted information
+            logger.info(f"🔧 DEBUG: About to create EmailData object...")
+            logger.info(f"🔧 DEBUG: Recipients for EmailData - To: {recipients}, CC: {cc_recipients}, BCC: {bcc_recipients}")
+            
             email_data = EmailData(
                 id=email_id,
                 subject=subject,
@@ -1247,7 +2310,7 @@ class OutlookAdapter:
     
     def _get_email_property(self, email_item: Any, property_name: str, default_value: Any) -> Any:
         """
-        Safely get property from email item with error handling.
+        Safely get property from email item with FORCED COM access and error handling.
         
         Args:
             email_item: The COM email object
@@ -1258,11 +2321,50 @@ class OutlookAdapter:
             Property value or default value
         """
         try:
+            # Method 1: Standard attribute access
             if hasattr(email_item, property_name):
                 value = getattr(email_item, property_name)
-                return value if value is not None else default_value
+                if value is not None:
+                    logger.info(f"🔧 DEBUG: Got {property_name}={value} via standard access")
+                    return value
+            
+            # Method 2: Try case variations
+            property_variations = [
+                property_name,
+                property_name.lower(),
+                property_name.upper(),
+                property_name.capitalize()
+            ]
+            
+            for prop_var in property_variations:
+                try:
+                    if hasattr(email_item, prop_var):
+                        value = getattr(email_item, prop_var)
+                        if value is not None:
+                            logger.info(f"🔧 DEBUG: Got {property_name}={value} via case variation {prop_var}")
+                            return value
+                except:
+                    continue
+            
+            # Method 3: Force COM object property access
+            try:
+                import pythoncom
+                if hasattr(email_item, '_oleobj_'):
+                    # Get the dispatch ID for the property
+                    disp_id = email_item._oleobj_.GetIDsOfNames(property_name)[0]
+                    # Invoke the property getter
+                    value = email_item._oleobj_.Invoke(disp_id, 0, pythoncom.DISPATCH_PROPERTYGET, 1)
+                    if value is not None:
+                        logger.info(f"🔧 DEBUG: Got {property_name}={value} via COM invoke")
+                        return value
+            except Exception as com_e:
+                logger.info(f"🔧 DEBUG: COM invoke failed for {property_name}: {com_e}")
+            
+            logger.info(f"🔧 DEBUG: All methods failed for {property_name}, using default: {default_value}")
             return default_value
+            
         except Exception as e:
+            logger.info(f"🔧 DEBUG: Error getting property '{property_name}': {str(e)}")
             logger.debug(f"Error getting property '{property_name}': {str(e)}")
             return default_value
     
@@ -1281,31 +2383,58 @@ class OutlookAdapter:
         bcc_recipients = []
         
         try:
+            logger.info(f"🔧 DEBUG: Starting recipient extraction...")
             if hasattr(email_item, 'Recipients') and email_item.Recipients:
+                logger.info(f"🔧 DEBUG: Found {email_item.Recipients.Count} recipients")
                 for recipient in email_item.Recipients:
                     try:
                         recipient_email = self._get_email_property(recipient, 'Address', '')
                         recipient_name = self._get_email_property(recipient, 'Name', '')
                         recipient_type = self._get_email_property(recipient, 'Type', 1)  # 1=To, 2=CC, 3=BCC
                         
+                        logger.info(f"🔧 DEBUG: Processing recipient - Email: '{recipient_email}', Name: '{recipient_name}', Type: {recipient_type}")
+                        
                         # Use email address if available, otherwise use name
                         recipient_address = recipient_email if recipient_email else recipient_name
                         
-                        # Validate email format
-                        if recipient_address and self._is_valid_email_format(recipient_address):
-                            if recipient_type == 1:  # To
-                                recipients.append(recipient_address)
-                            elif recipient_type == 2:  # CC
-                                cc_recipients.append(recipient_address)
-                            elif recipient_type == 3:  # BCC
-                                bcc_recipients.append(recipient_address)
-                        elif recipient_address:  # Add even if not valid email format
-                            if recipient_type == 1:
-                                recipients.append(recipient_address)
-                            elif recipient_type == 2:
-                                cc_recipients.append(recipient_address)
-                            elif recipient_type == 3:
-                                bcc_recipients.append(recipient_address)
+                        # Handle Exchange internal addresses and validate email format
+                        if recipient_address:
+                            # Convert Exchange internal addresses to a readable format
+                            if recipient_address.startswith('/o=') or recipient_address.startswith('/O='):
+                                logger.info(f"🔧 DEBUG: Found Exchange address: '{recipient_address}' - converting...")
+                                # This is an Exchange internal address - convert to name@internal.exchange
+                                if recipient_name and recipient_name != recipient_address:
+                                    # Use the display name if available
+                                    clean_name = ''.join(c for c in recipient_name if c.isalnum() or c in '._-')
+                                    recipient_address = f"{clean_name}@internal.exchange" if clean_name else "unknown@internal.exchange"
+                                    logger.info(f"🔧 DEBUG: Converted using name: '{recipient_address}'")
+                                else:
+                                    # Extract some identifier from the Exchange address
+                                    if 'cn=' in recipient_address.lower():
+                                        try:
+                                            # Extract the CN (Common Name) part
+                                            cn_part = recipient_address.lower().split('cn=')[-1].split('/')[0].split('-')[0]
+                                            recipient_address = f"{cn_part}@internal.exchange"
+                                            logger.info(f"🔧 DEBUG: Converted using CN: '{recipient_address}'")
+                                        except:
+                                            recipient_address = "unknown@internal.exchange"
+                                            logger.info(f"🔧 DEBUG: Conversion failed, using default: '{recipient_address}'")
+                                    else:
+                                        recipient_address = "unknown@internal.exchange"
+                                        logger.info(f"🔧 DEBUG: No CN found, using default: '{recipient_address}'")
+                            
+                            # Now validate the cleaned email format
+                            if self._is_valid_email_format(recipient_address):
+                                if recipient_type == 1:  # To
+                                    recipients.append(recipient_address)
+                                elif recipient_type == 2:  # CC
+                                    cc_recipients.append(recipient_address)
+                                elif recipient_type == 3:  # BCC
+                                    bcc_recipients.append(recipient_address)
+                            else:
+                                # Skip invalid addresses to prevent EmailData validation errors
+                                logger.debug(f"Skipping invalid recipient address: {recipient_address}")
+                                continue
                                 
                     except Exception as e:
                         logger.debug(f"Error processing recipient: {str(e)}")
@@ -1330,25 +2459,35 @@ class OutlookAdapter:
         body_html = ""
         
         try:
+            logger.info(f"🔧 DEBUG: Starting body extraction...")
+            
             # Get plain text body
             body = self._get_email_property(email_item, 'Body', '')
+            logger.info(f"🔧 DEBUG: Plain text body length: {len(body)}")
             
             # Get HTML body
             body_html = self._get_email_property(email_item, 'HTMLBody', '')
+            logger.info(f"🔧 DEBUG: HTML body length: {len(body_html)}")
             
             # If we have HTML but no plain text, try to extract text from HTML
             if body_html and not body:
+                logger.info(f"🔧 DEBUG: Extracting text from HTML...")
                 body = self._extract_text_from_html(body_html)
+                logger.info(f"🔧 DEBUG: Extracted text length: {len(body)}")
             
             # If we have plain text but no HTML, create basic HTML
             elif body and not body_html:
+                logger.info(f"🔧 DEBUG: Creating HTML from text...")
                 body_html = self._create_html_from_text(body)
             
             # Clean up the content
             body = self._clean_text_content(body)
             body_html = self._clean_html_content(body_html)
             
+            logger.info(f"🔧 DEBUG: Final body lengths - Text: {len(body)}, HTML: {len(body_html)}")
+            
         except Exception as e:
+            logger.info(f"🔧 DEBUG: Error extracting email body: {str(e)}")
             logger.debug(f"Error extracting email body: {str(e)}")
         
         return body, body_html
@@ -1447,6 +2586,221 @@ class OutlookAdapter:
         
         return "Unknown"
     
+    def send_email(self, 
+                   to_recipients: List[str], 
+                   subject: str, 
+                   body: str, 
+                   cc_recipients: List[str] = None,
+                   bcc_recipients: List[str] = None,
+                   body_format: str = "html",
+                   importance: str = "normal",
+                   attachments: List[str] = None,
+                   save_to_sent_items: bool = True) -> str:
+        """
+        Send an email through Outlook.
+        
+        Args:
+            to_recipients: List of recipient email addresses
+            subject: Email subject
+            body: Email body content
+            cc_recipients: Optional list of CC recipients
+            bcc_recipients: Optional list of BCC recipients
+            body_format: Body format - "html", "text", or "rtf" (default: "html")
+            importance: Email importance - "low", "normal", or "high" (default: "normal")
+            attachments: Optional list of file paths to attach
+            save_to_sent_items: Whether to save to Sent Items folder (default: True)
+            
+        Returns:
+            str: The EntryID of the sent email
+            
+        Raises:
+            OutlookConnectionError: If not connected to Outlook
+            ValidationError: If parameters are invalid
+            PermissionError: If sending is not allowed
+        """
+        if not self.is_connected():
+            raise OutlookConnectionError("Not connected to Outlook")
+        
+        # Validate required parameters
+        if not to_recipients or not isinstance(to_recipients, list) or len(to_recipients) == 0:
+            raise ValidationError("At least one recipient is required", "to_recipients")
+        
+        if not subject or not isinstance(subject, str):
+            raise ValidationError("Subject is required and must be a string", "subject")
+        
+        if not body or not isinstance(body, str):
+            raise ValidationError("Body is required and must be a string", "body")
+        
+        # Validate email addresses
+        for email in to_recipients:
+            if not self._validate_email_address(email):
+                raise ValidationError(f"Invalid email address: {email}", "to_recipients")
+        
+        if cc_recipients:
+            for email in cc_recipients:
+                if not self._validate_email_address(email):
+                    raise ValidationError(f"Invalid CC email address: {email}", "cc_recipients")
+        
+        if bcc_recipients:
+            for email in bcc_recipients:
+                if not self._validate_email_address(email):
+                    raise ValidationError(f"Invalid BCC email address: {email}", "bcc_recipients")
+        
+        # Validate body format
+        valid_formats = {"html": 2, "text": 1, "rtf": 3}  # Outlook constants
+        if body_format.lower() not in valid_formats:
+            raise ValidationError(f"Invalid body format. Must be one of: {list(valid_formats.keys())}", "body_format")
+        
+        # Validate importance
+        importance_map = {"low": 0, "normal": 1, "high": 2}  # Outlook constants
+        if importance.lower() not in importance_map:
+            raise ValidationError(f"Invalid importance. Must be one of: {list(importance_map.keys())}", "importance")
+        
+        try:
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            
+            logger.info(f"Sending email to {len(to_recipients)} recipients: {', '.join(to_recipients)}")
+            
+            # Create a new Outlook application instance for this thread
+            # This is necessary because COM objects can't be shared across threads
+            try:
+                outlook_app = win32com.client.GetActiveObject("Outlook.Application")
+                logger.info("Using existing Outlook instance for sending email")
+            except Exception as e:
+                logger.info(f"Could not get existing Outlook instance: {e}")
+                try:
+                    outlook_app = win32com.client.Dispatch("Outlook.Application")
+                    logger.info("Created new Outlook instance for sending email")
+                except Exception as e2:
+                    logger.error(f"Failed to create Outlook instance: {e2}")
+                    raise OutlookConnectionError(f"Cannot create Outlook application: {e2}")
+            
+            # Create a new mail item
+            try:
+                mail_item = outlook_app.CreateItem(0)  # 0 = olMailItem
+                logger.info("Successfully created mail item")
+            except Exception as e:
+                logger.error(f"Failed to create mail item: {e}")
+                raise OutlookConnectionError(f"Cannot create mail item: {e}")
+            
+            # Set recipients
+            for recipient in to_recipients:
+                mail_item.Recipients.Add(recipient)
+            
+            if cc_recipients:
+                for cc_recipient in cc_recipients:
+                    cc_recip = mail_item.Recipients.Add(cc_recipient)
+                    cc_recip.Type = 2  # olCC
+            
+            if bcc_recipients:
+                for bcc_recipient in bcc_recipients:
+                    bcc_recip = mail_item.Recipients.Add(bcc_recipient)
+                    bcc_recip.Type = 3  # olBCC
+            
+            # Resolve all recipients
+            mail_item.Recipients.ResolveAll()
+            
+            # Set email properties
+            mail_item.Subject = subject
+            mail_item.Body = body if body_format.lower() == "text" else ""
+            
+            if body_format.lower() == "html":
+                mail_item.HTMLBody = body
+            elif body_format.lower() == "rtf":
+                mail_item.RTFBody = body
+            
+            # Set importance
+            mail_item.Importance = importance_map[importance.lower()]
+            
+            # Add attachments if provided
+            if attachments:
+                for attachment_path in attachments:
+                    if not isinstance(attachment_path, str):
+                        logger.warning(f"Skipping invalid attachment path: {attachment_path}")
+                        continue
+                    
+                    try:
+                        import os
+                        if os.path.exists(attachment_path):
+                            mail_item.Attachments.Add(attachment_path)
+                            logger.debug(f"Added attachment: {attachment_path}")
+                        else:
+                            logger.warning(f"Attachment file not found: {attachment_path}")
+                    except Exception as e:
+                        logger.warning(f"Failed to add attachment {attachment_path}: {str(e)}")
+            
+            # Get a unique identifier before sending (EntryID is not available until saved)
+            # We'll use a timestamp-based ID since EntryID is not reliable for unsent items
+            email_id = f"sent_{int(time.time() * 1000)}_{hash(subject + str(to_recipients))}"
+            
+            # Send the email - wrap in try/catch to handle Outlook COM quirks
+            try:
+                logger.info(f"Attempting to send email to {', '.join(to_recipients)}")
+                mail_item.Send()
+                logger.info(f"Email sent successfully to {', '.join(to_recipients)}")
+                
+                # Email was sent successfully, return immediately
+                return email_id
+                
+            except Exception as send_error:
+                error_msg = str(send_error)
+                logger.warning(f"Exception during send operation: {error_msg}")
+                
+                # Check if this is the "item moved or deleted" error which often occurs
+                # even when the email is sent successfully due to Outlook COM behavior
+                if ("moved or deleted" in error_msg.lower() or 
+                    "移動或刪除" in error_msg or 
+                    "-2147221238" in error_msg or
+                    "-2147352567" in error_msg or  # Another common Outlook COM error after successful send
+                    "項目已經移動或刪除" in error_msg):
+                    
+                    logger.info(f"Outlook COM quirk detected - email sent successfully despite COM exception")
+                    logger.info(f"This is normal behavior - Outlook moves the mail item after sending")
+                    # Treat as success since this is a known Outlook COM issue
+                    return email_id
+                else:
+                    # This is likely a real send failure
+                    logger.error(f"Actual email send failure: {send_error}")
+                    raise OutlookConnectionError(f"Email send failed: {send_error}")
+            
+        except Exception as e:
+            logger.error(f"Failed to send email: {str(e)}")
+            
+            # Check for permission-related errors
+            if any(keyword in str(e).lower() for keyword in ['access', 'permission', 'denied', 'unauthorized', 'policy']):
+                raise PermissionError("send_email", f"Permission denied to send email: {str(e)}")
+            
+            # Check for validation errors
+            if any(keyword in str(e).lower() for keyword in ['invalid', 'malformed', 'resolve', 'recipient']):
+                raise ValidationError(f"Email validation failed: {str(e)}")
+            
+            raise OutlookConnectionError(f"Failed to send email: {str(e)}")
+        
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except:
+                pass  # Ignore cleanup errors
+    
+    def _validate_email_address(self, email: str) -> bool:
+        """
+        Validate email address format.
+        
+        Args:
+            email: Email address to validate
+            
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        if not email or not isinstance(email, str):
+            return False
+        
+        # Basic email validation regex
+        import re
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(pattern, email.strip()))
+
     def _validate_sender_info(self, sender_name: str, sender_email: str) -> tuple[str, str]:
         """
         Validate and fix sender name and email information.
@@ -1458,19 +2812,49 @@ class OutlookAdapter:
         Returns:
             Tuple of (validated_sender_name, validated_sender_email)
         """
+        logger.info(f"🔧 DEBUG: Validating sender - Name: '{sender_name}', Email: '{sender_email}'")
+        
+        # Handle Exchange internal addresses first
+        if sender_email and (sender_email.startswith('/o=') or sender_email.startswith('/O=')):
+            logger.info(f"🔧 DEBUG: Found Exchange sender address: '{sender_email}' - converting...")
+            # This is an Exchange internal address - convert to name@internal.exchange
+            if sender_name and sender_name != sender_email:
+                # Use the display name if available
+                clean_name = ''.join(c for c in sender_name if c.isalnum() or c in '._-')
+                sender_email = f"{clean_name}@internal.exchange" if clean_name else "unknown@internal.exchange"
+                logger.info(f"🔧 DEBUG: Converted sender using name: '{sender_email}'")
+            else:
+                # Extract some identifier from the Exchange address
+                if 'cn=' in sender_email.lower():
+                    try:
+                        # Extract the CN (Common Name) part
+                        cn_part = sender_email.lower().split('cn=')[-1].split('/')[0].split('-')[0]
+                        sender_email = f"{cn_part}@internal.exchange"
+                        logger.info(f"🔧 DEBUG: Converted sender using CN: '{sender_email}'")
+                    except:
+                        sender_email = "unknown@internal.exchange"
+                        logger.info(f"🔧 DEBUG: Sender conversion failed, using default: '{sender_email}'")
+                else:
+                    sender_email = "unknown@internal.exchange"
+                    logger.info(f"🔧 DEBUG: No CN found in sender, using default: '{sender_email}'")
+        
         # Fix sender email if invalid
-        if not sender_email or not self._is_valid_email_format(sender_email):
+        elif not sender_email or not self._is_valid_email_format(sender_email):
+            logger.info(f"🔧 DEBUG: Invalid sender email format, creating from name...")
             if sender_name:
                 # Create email from sender name
                 clean_name = ''.join(c for c in sender_name if c.isalnum() or c in '._-')
                 sender_email = f"{clean_name}@unknown.com" if clean_name else "unknown@unknown.com"
             else:
                 sender_email = "unknown@unknown.com"
+            logger.info(f"🔧 DEBUG: Created sender email: '{sender_email}'")
         
         # Fix sender name if missing
         if not sender_name:
             sender_name = sender_email.split('@')[0] if '@' in sender_email else "Unknown Sender"
+            logger.info(f"🔧 DEBUG: Created sender name: '{sender_name}'")
         
+        logger.info(f"🔧 DEBUG: Final sender - Name: '{sender_name}', Email: '{sender_email}'")
         return sender_name, sender_email
     
     def _is_valid_email_format(self, email: str) -> bool:

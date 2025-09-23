@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "test-chinese-folder",
+  "method": "list_emails",
+  "params": {
+    "folder": "收件匣",
+    "limit": 5
+  }
+}

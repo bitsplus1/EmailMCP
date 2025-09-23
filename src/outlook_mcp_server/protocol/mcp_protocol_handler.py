@@ -26,15 +26,11 @@ class MCPProtocolHandler:
     SERVER_CAPABILITIES = {
         "tools": [
             {
-                "name": "list_emails",
-                "description": "List emails from specified folders with filtering options",
+                "name": "list_inbox_emails",
+                "description": "List emails from the default inbox folder",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "folder": {
-                            "type": "string",
-                            "description": "Folder name to list emails from"
-                        },
                         "unread_only": {
                             "type": "boolean",
                             "description": "Filter to show only unread emails",
@@ -48,6 +44,32 @@ class MCPProtocolHandler:
                             "maximum": 1000
                         }
                     }
+                }
+            },
+            {
+                "name": "list_emails",
+                "description": "List emails from a specific folder by folder ID",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "folder_id": {
+                            "type": "string",
+                            "description": "Folder ID to list emails from (use get_folders to see available folder IDs)"
+                        },
+                        "unread_only": {
+                            "type": "boolean",
+                            "description": "Filter to show only unread emails",
+                            "default": False
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of emails to return",
+                            "default": 50,
+                            "minimum": 1,
+                            "maximum": 1000
+                        }
+                    },
+                    "required": ["folder_id"]
                 }
             },
             {
@@ -74,9 +96,9 @@ class MCPProtocolHandler:
                             "type": "string",
                             "description": "Search query to find emails"
                         },
-                        "folder": {
+                        "folder_id": {
                             "type": "string",
-                            "description": "Folder to limit search to (optional)"
+                            "description": "Folder ID to limit search to (optional, use get_folders to see available folder IDs)"
                         },
                         "limit": {
                             "type": "integer",
@@ -92,6 +114,73 @@ class MCPProtocolHandler:
             {
                 "name": "get_folders",
                 "description": "List all available email folders in Outlook",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {}
+                }
+            },
+            {
+                "name": "send_email",
+                "description": "Send an email through Outlook",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "to_recipients": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of recipient email addresses",
+                            "minItems": 1
+                        },
+                        "subject": {
+                            "type": "string",
+                            "description": "Email subject line",
+                            "minLength": 1,
+                            "maxLength": 255
+                        },
+                        "body": {
+                            "type": "string",
+                            "description": "Email body content",
+                            "minLength": 1
+                        },
+                        "cc_recipients": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of CC recipients (optional)"
+                        },
+                        "bcc_recipients": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of BCC recipients (optional)"
+                        },
+                        "body_format": {
+                            "type": "string",
+                            "enum": ["html", "text", "rtf"],
+                            "description": "Email body format",
+                            "default": "html"
+                        },
+                        "importance": {
+                            "type": "string",
+                            "enum": ["low", "normal", "high"],
+                            "description": "Email importance level",
+                            "default": "normal"
+                        },
+                        "attachments": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of file paths to attach (optional)"
+                        },
+                        "save_to_sent_items": {
+                            "type": "boolean",
+                            "description": "Whether to save email to Sent Items folder",
+                            "default": True
+                        }
+                    },
+                    "required": ["to_recipients", "subject", "body"]
+                }
+            },
+            {
+                "name": "debug_folder_names",
+                "description": "Debug method to get actual folder names for troubleshooting localization issues",
                 "inputSchema": {
                     "type": "object",
                     "properties": {}

@@ -203,21 +203,51 @@ Example configuration (`outlook_mcp_server_config.json`):
 
 | Method | Description | Parameters |
 |--------|-------------|------------|
-| `list_emails` | List emails with filtering | `folder`, `unread_only`, `limit` |
+| `list_inbox_emails` | List emails from inbox (simple) | `unread_only`, `limit` |
+| `list_emails` | List emails from specific folder | `folder_id`, `unread_only`, `limit` |
 | `get_email` | Get detailed email by ID | `email_id` |
-| `search_emails` | Search emails by query | `query`, `folder`, `limit` |
+| `search_emails` | Search emails by query | `query`, `folder_id`, `limit` |
+| `send_email` | Send email through Outlook | `to_recipients`, `subject`, `body`, etc. |
 | `get_folders` | List all available folders | None |
 
-#### Example Request
+#### Example Requests
 
+**Simple Inbox Listing:**
 ```json
 {
   "jsonrpc": "2.0",
   "id": "1",
+  "method": "list_inbox_emails",
+  "params": {
+    "unread_only": true,
+    "limit": 10
+  }
+}
+```
+
+**Folder-Specific Listing:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "2",
   "method": "list_emails",
   "params": {
-    "folder": "Inbox",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "unread_only": true,
+    "limit": 10
+  }
+}
+```
+
+**Search in Specific Folder:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "3",
+  "method": "search_emails",
+  "params": {
+    "query": "subject:meeting",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "limit": 10
   }
 }

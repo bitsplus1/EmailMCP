@@ -8,9 +8,11 @@ The Outlook MCP Server provides programmatic access to Microsoft Outlook email f
 
 - [Authentication & Connection](#authentication--connection)
 - [Available Methods](#available-methods)
+  - [list_inbox_emails](#list_inbox_emails)
   - [list_emails](#list_emails)
   - [get_email](#get_email)
   - [search_emails](#search_emails)
+  - [send_email](#send_email)
   - [get_folders](#get_folders)
 - [Data Models](#data-models)
 - [Error Handling](#error-handling)
@@ -30,15 +32,96 @@ The Outlook MCP Server connects to a locally installed Microsoft Outlook applica
 
 ## Available Methods
 
-### list_emails
+### list_inbox_emails
 
-Lists emails from specified folders with filtering and pagination options.
+Lists emails from the default inbox folder with filtering options. This is a simplified method that automatically finds and accesses the inbox folder.
 
 #### Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `folder` | string | No | null | Folder name to list emails from. If not specified, lists from default folder (usually Inbox) |
+| `unread_only` | boolean | No | false | Filter to show only unread emails |
+| `limit` | integer | No | 50 | Maximum number of emails to return (1-1000) |
+
+#### Request Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "list_inbox_emails",
+  "params": {
+    "unread_only": true,
+    "limit": 10
+  }
+}
+```
+
+#### Response Format
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "result": {
+    "emails": [
+      {
+        "id": "AAMkADExMzJmYWE...",
+        "subject": "Project Update - Q4 Planning",
+        "sender": "John Doe",
+        "sender_email": "john.doe@company.com",
+        "recipients": ["team@company.com"],
+        "received_time": "2024-01-15T10:30:00Z",
+        "sent_time": "2024-01-15T10:25:00Z",
+        "is_read": false,
+        "has_attachments": true,
+        "importance": "Normal",
+        "folder": "Inbox",
+        "size": 15420,
+        "body_preview": "Hi team, I wanted to share the latest updates..."
+      }
+    ]
+  }
+}
+```
+
+#### Usage Examples
+
+**List latest 5 emails from inbox:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "list_inbox_emails",
+  "params": {
+    "limit": 5
+  }
+}
+```
+
+**List only unread emails from inbox:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "2",
+  "method": "list_inbox_emails",
+  "params": {
+    "unread_only": true
+  }
+}
+```
+
+---
+
+### list_emails
+
+Lists emails from a specific folder by folder ID with filtering options. Use `get_folders` to obtain folder IDs.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `folder_id` | string | Yes | - | Folder ID to list emails from (use get_folders to see available folder IDs) |
 | `unread_only` | boolean | No | false | Filter to show only unread emails |
 | `limit` | integer | No | 50 | Maximum number of emails to return (1-1000) |
 
@@ -50,7 +133,7 @@ Lists emails from specified folders with filtering and pagination options.
   "id": "1",
   "method": "list_emails",
   "params": {
-    "folder": "Inbox",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "unread_only": true,
     "limit": 10
   }
@@ -90,37 +173,40 @@ Lists emails from specified folders with filtering and pagination options.
 
 #### Usage Examples
 
-**List all emails from Inbox:**
+**List emails from specific folder:**
 ```json
 {
   "jsonrpc": "2.0",
   "id": "1",
   "method": "list_emails",
-  "params": {}
+  "params": {
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000"
+  }
 }
 ```
 
-**List unread emails with limit:**
+**List unread emails from specific folder:**
 ```json
 {
   "jsonrpc": "2.0",
   "id": "2",
   "method": "list_emails",
   "params": {
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "unread_only": true,
     "limit": 25
   }
 }
 ```
 
-**List emails from specific folder:**
+**List emails from Sent Items folder:**
 ```json
 {
   "jsonrpc": "2.0",
   "id": "3",
   "method": "list_emails",
   "params": {
-    "folder": "Sent Items",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A91111",
     "limit": 100
   }
 }
@@ -215,7 +301,7 @@ Searches emails based on user-defined queries across folders or within specific 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `query` | string | Yes | - | Search query string (max 1000 characters) |
-| `folder` | string | No | null | Folder to limit search to. If not specified, searches all accessible folders |
+| `folder_id` | string | No | null | Folder ID to limit search to. If not specified, searches all accessible folders |
 | `limit` | integer | No | 50 | Maximum number of results to return (1-1000) |
 
 #### Request Example
@@ -227,7 +313,7 @@ Searches emails based on user-defined queries across folders or within specific 
   "method": "search_emails",
   "params": {
     "query": "project update",
-    "folder": "Inbox",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "limit": 20
   }
 }
@@ -297,7 +383,7 @@ The search functionality supports various query formats:
   "method": "search_emails",
   "params": {
     "query": "from:manager@company.com",
-    "folder": "Inbox",
+    "folder_id": "00000000DB2820C5F3F8204492F273035529BA6801009D535D0407B9BD4E92EA5AC6287D1BFE000006B7F6A90000",
     "limit": 10
   }
 }

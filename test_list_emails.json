@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "test-list-emails",
+  "method": "list_emails",
+  "params": {
+    "folder": "Inbox",
+    "limit": 5
+  }
+}

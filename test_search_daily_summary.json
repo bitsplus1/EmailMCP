@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "search-daily-summary",
+  "method": "search_emails",
+  "params": {
+    "query": "Automated Report - Daily Summary",
+    "limit": 10
+  }
+}
